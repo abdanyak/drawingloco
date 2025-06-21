@@ -7,6 +7,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     * { box-sizing: border-box; }
+
     html, body {
       margin: 0;
       padding: 0;
@@ -14,6 +15,7 @@
       min-height: 100vh;
       position: relative;
     }
+
     body::before {
       content: "";
       position: fixed;
@@ -24,6 +26,7 @@
       filter: blur(2px);
       z-index: -1;
     }
+
     header {
       display: flex;
       justify-content: space-between;
@@ -31,13 +34,16 @@
       background-color: rgba(255, 255, 255, 0.92);
       padding: 10px 20px;
     }
+
     .logo-left, .logo-right {
       display: flex;
       align-items: center;
       gap: 10px;
     }
+
     .logo-left img { height: 20px; }
     .logo-right img { height: 30px; }
+
     .container {
       background-color: rgba(255, 255, 255, 0.92);
       max-width: 900px;
@@ -46,10 +52,12 @@
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
     }
+
     h2 {
       text-align: center;
       margin-bottom: 25px;
     }
+
     .search-bar {
       display: flex;
       flex-wrap: wrap;
@@ -57,6 +65,7 @@
       gap: 10px;
       margin-bottom: 20px;
     }
+
     .search-bar input[type="text"] {
       flex: 1;
       min-width: 250px;
@@ -66,6 +75,7 @@
       border-radius: 6px;
       border: 1px solid #ccc;
     }
+
     .search-bar button {
       height: 42px;
       padding: 0 20px;
@@ -76,11 +86,13 @@
       border-radius: 6px;
       cursor: pointer;
     }
+
     .table-wrapper {
       overflow-x: auto;
       width: 100%;
       margin-top: 20px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -88,25 +100,30 @@
       table-layout: auto;
       word-break: break-word;
     }
+
     th, td {
       border: 1px solid #ccc;
       padding: 10px;
       text-align: left;
       vertical-align: top;
     }
+
     th {
       background-color: #f3f3f3;
     }
+
     td:first-child {
       max-width: 300px;
       white-space: normal;
       word-wrap: break-word;
     }
+
     .export-area {
       text-align: center;
       margin-top: 20px;
       display: none;
     }
+
     .export-area button {
       background-color: #28a745;
       color: white;
@@ -116,12 +133,39 @@
       border-radius: 8px;
       cursor: pointer;
     }
+
     .copyright {
       text-align: center;
-      margin: 20px 0;
+      margin: 40px 0 20px;
       font-size: 13px;
       color: white;
     }
+
+    #loading-status {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 16px;
+      margin-top: 30px;
+      height: 24px;
+    }
+
+    #loading-status.loading::after {
+      content: '';
+      display: inline-block;
+      width: 1em;
+      text-align: left;
+      animation: dots 1.2s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: ''; }
+      40% { content: '.'; }
+      60% { content: '..'; }
+      80%, 100% { content: '...'; }
+    }
+
     @media (max-width: 600px) {
       .logo-left img { height: 18px; }
       .logo-right img { height: 24px; }
@@ -135,6 +179,7 @@
   </style>
 </head>
 <body>
+
   <header>
     <div class="logo-left">
       <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
@@ -144,25 +189,32 @@
       <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
     </div>
   </header>
+
   <div class="container">
     <h2>Drawing Loco Platform UGL</h2>
+
     <div class="search-bar">
       <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)" />
       <button onclick="cari()">Cari</button>
     </div>
+
     <div id="loading-status" class="loading">⏳ Memuat data</div>
     <div id="hasil"></div>
+
     <div class="export-area" id="export-area">
       <button onclick="exportToExcel()">📥 Export File Terpilih (.xlsx)</button>
     </div>
   </div>
+
   <div class="copyright">
     © Abdany Afiq Khoiri
   </div>
+
   <script>
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
     let semuaData = [];
     const selectedFiles = new Map();
+
     const hasilEl = document.getElementById("hasil");
     const loadingStatus = document.getElementById("loading-status");
     const exportArea = document.getElementById("export-area");
@@ -183,33 +235,42 @@
     function cari() {
       const keyword = document.getElementById("keyword").value.trim().toLowerCase();
       if (!keyword) return;
-      const hasil = semuaData.filter(item => item.name.toLowerCase().includes(keyword));
+
+      const hasil = semuaData.filter(item =>
+        item.name.toLowerCase().includes(keyword)
+      );
+
       if (hasil.length === 0) {
         hasilEl.innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
         exportArea.style.display = "none";
         return;
       }
+
       const fileTerakhir = {};
       hasil.forEach(file => {
         const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
         const revStr = String(file.revisi).trim();
         let revCompare = /^\d+$/.test(revStr) ? parseInt(revStr) : revStr.toUpperCase().charCodeAt(0);
+
         if (!fileTerakhir[key] || revCompare > fileTerakhir[key].revCompare) {
           fileTerakhir[key] = { ...file, revCompare };
         }
       });
+
       let html = "<div class='table-wrapper'><table><thead><tr><th>Pilih</th><th>Nama File</th><th>REV</th><th>Link PDF</th></tr></thead><tbody>";
       Object.values(fileTerakhir).forEach(file => {
         const fileKey = `${file.name}|${file.revisi}|${file.url}`;
         const isChecked = selectedFiles.has(fileKey) ? "checked" : "";
-        html += `<tr>
-          <td><input type="checkbox" onchange="toggleSelection(this)" data-key="${fileKey}" ${isChecked}></td>
-          <td>${file.name}</td>
-          <td>${file.revisi}</td>
-          <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
-        </tr>`;
+        html += `
+          <tr>
+            <td><input type="checkbox" onchange="toggleSelection(this)" data-key="${fileKey}" ${isChecked}></td>
+            <td>${file.name}</td>
+            <td>${file.revisi}</td>
+            <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
+          </tr>`;
       });
       html += "</tbody></table></div>";
+
       hasilEl.innerHTML = html;
       exportArea.style.display = "block";
       loadingStatus.style.display = "none";
@@ -230,10 +291,12 @@
         alert("❗ Pilih minimal satu file terlebih dahulu.");
         return;
       }
+
       const data = [["Nama File", "REV", "Link PDF"]];
       selectedFiles.forEach(file => {
         data.push([file.name, file.revisi, file.url]);
       });
+
       const ws = XLSX.utils.aoa_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Files Terpilih");
