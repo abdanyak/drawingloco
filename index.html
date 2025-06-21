@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Web Drawing Loco Platform UGL</title>
   <style>
     * {
@@ -14,7 +14,8 @@
       padding: 0;
       font-family: 'Segoe UI', sans-serif;
       min-height: 100vh;
-      position: relative;
+      display: flex;
+      flex-direction: column;
     }
 
     body::before {
@@ -35,6 +36,7 @@
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      flex: 1;
     }
 
     .logo-area {
@@ -152,9 +154,10 @@
 
     .copyright {
       text-align: center;
-      margin-top: 40px;
+      padding: 10px;
       font-size: 13px;
       color: #444;
+      background-color: rgba(255,255,255,0.7);
     }
 
     @media (max-width: 600px) {
@@ -181,6 +184,7 @@
 
     <div id="hasil"></div>
     <div id="loading-status" class="loading">⏳ Memuat data</div>
+
     <div class="export-area" id="export-area">
       <div>✅ Siap digunakan</div>
       <button onclick="exportToExcel()">📥 Export ke Excel</button>
@@ -251,7 +255,6 @@
         exportArea.style.display = "block";
       }
 
-      // Sembunyikan status setelah pencarian
       loadingStatus.style.display = "none";
     }
 
