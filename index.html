@@ -4,28 +4,97 @@
   <meta charset="UTF-8">
   <title>Pencarian File PDF Revisi Terakhir</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; }
-    input { padding: 8px; width: 70%; margin-right: 10px; font-size: 16px; }
-    button { padding: 8px 14px; font-size: 16px; cursor: pointer; }
-    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-    th { background-color: #f3f3f3; }
-    a { color: blue; text-decoration: underline; }
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      position: relative;
+      min-height: 100vh;
+      background: rgba(255,255,255,0.8);
+    }
+
+    /* Background image with blur */
+    body::before {
+      content: "";
+      background-image: url('https://media.licdn.com/dms/image/v2/C5605AQF-8cSaDlhrtQ/feedshare-thumbnail_720_1280/feedshare-thumbnail_720_1280/0/1659938691153?e=2147483647&v=beta&t=1oR4qJCLb-iSWTnF3sLHhETQQ9b0pPAPb3Op8cLfY0Q');
+      background-size: cover;
+      background-position: center;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: -1;
+      filter: blur(10px);
+      opacity: 0.3;
+    }
+
+    .container {
+      padding: 30px;
+      max-width: 900px;
+      margin: auto;
+      background-color: rgba(255, 255, 255, 0.85);
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      margin-top: 40px;
+    }
+
+    input {
+      padding: 10px;
+      width: 65%;
+      margin-right: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 14px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f3f3f3;
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
 
-  <h2>🔍 Cari File PDF - Revisi Terakhir</h2>
-  <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)" />
-  <button onclick="cari()">Cari</button>
+  <div class="container">
+    <h2>🔍 Cari File PDF - Revisi Terakhir</h2>
+    <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)" />
+    <button onclick="cari()">Cari</button>
 
-  <div id="hasil" style="margin-top: 20px;"></div>
+    <div id="hasil" style="margin-top: 20px;"></div>
+  </div>
 
   <script>
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
     let semuaData = [];
 
-    // Ambil data dari Google Apps Script saat awal
     fetch(url)
       .then(res => res.json())
       .then(json => {
@@ -50,19 +119,16 @@
         return;
       }
 
-      // Kelompokkan berdasarkan kombinasi Kode + Kode Lanjutan + Halaman
       const fileTerakhir = {};
       hasil.forEach(file => {
         const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
-
-        // Ambil angka atau huruf dari revisi sebagai pembanding
         const revStr = String(file.revisi).trim();
         let revCompare = 0;
 
         if (/^\d+$/.test(revStr)) {
-          revCompare = parseInt(revStr); // numerik seperti 01, 02
+          revCompare = parseInt(revStr);
         } else if (/^[A-Z]$/i.test(revStr)) {
-          revCompare = revStr.toUpperCase().charCodeAt(0); // huruf jadi ASCII
+          revCompare = revStr.toUpperCase().charCodeAt(0);
         }
 
         if (!fileTerakhir[key] || revCompare > fileTerakhir[key].revCompare) {
@@ -70,7 +136,6 @@
         }
       });
 
-      // Buat tampilan tabel
       let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr>";
       Object.values(fileTerakhir).forEach(file => {
         html += `
