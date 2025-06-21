@@ -28,27 +28,33 @@
       z-index: -1;
     }
 
-    .logo-left {
-      position: absolute;
-      top: 16px;
-      left: 20px;
+    /* NAVBAR HEADER */
+    .navbar {
       display: flex;
-      gap: 12px;
+      justify-content: space-between;
       align-items: center;
+      padding: 10px 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 10;
     }
 
-    .logo-right {
-      position: absolute;
-      top: 16px;
-      right: 20px;
+    .navbar-left, .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .logo-left img {
-      max-height: 40px;
+    .navbar-left img {
+      height: 20px;
     }
 
-    .logo-right img {
-      max-height: 50px;
+    .navbar-right img {
+      height: 30px;
     }
 
     .container {
@@ -162,17 +168,18 @@
 </head>
 <body>
 
-  <!-- LOGO POJOK KIRI -->
-  <div class="logo-left">
-    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
-    <img src="https://wp.logos-download.com/wp-content/uploads/2016/07/CIMIC_logo.png?dl" alt="Logo CIMIC">
+  <!-- NAVBAR HEADER -->
+  <div class="navbar">
+    <div class="navbar-left">
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
+      <img src="https://wp.logos-download.com/wp-content/uploads/2016/07/CIMIC_logo.png?dl" alt="Logo CIMIC">
+    </div>
+    <div class="navbar-right">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
+    </div>
   </div>
 
-  <!-- LOGO POJOK KANAN -->
-  <div class="logo-right">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
-  </div>
-
+  <!-- KONTEN UTAMA -->
   <div class="container">
     <h2>Drawing Loco Platform UGL</h2>
 
@@ -253,7 +260,6 @@
         exportArea.style.display = "block";
       }
 
-      // Sembunyikan status siap digunakan setelah pencarian
       loadingStatus.style.display = "none";
     }
 
