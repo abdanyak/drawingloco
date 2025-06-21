@@ -1,181 +1,141 @@
-// State urutan (sort)
-let sortState = {
-  column: null, // 'name' atau 'revisi'
-  asc: true
-};
-
-// --- Ambil Data ---
-fetch(url)
-  .then(res => res.json())
-  .then(json => {
-    semuaData = json;
-    loadingStatus.textContent = "✅ Siap digunakan";
-    loadingStatus.classList.remove("dot-animate");
-  })
-  .catch(err => {
-    loadingStatus.textContent = "⚠️ Gagal mengambil data";
-    console.error(err);
-  });
-
-// --- Update Daftar File Terpilih ---
-function updateSelectedList() {
-  if (selectedFiles.size === 0) {
-    fileTerpilihEl.innerHTML = "";
-    return;
-  }
-  let html = `<div class='table-wrapper'><h3>📌 File Terpilih</h3>
-  <table>
-    <thead>
-      <tr>
-        <th class="file-name">Nama File</th>
-        <th>REV</th>
-        <th>Link</th>
-        <th>Hapus</th>
-      </tr>
-    </thead>
-    <tbody>`;
-  selectedFiles.forEach((file, key) => {
-    html += `<tr>
-      <td class="file-name">${file.name}</td>
-      <td>${file.revisi}</td>
-      <td><a href="${file.url}" target="_blank">📄 Lihat</a></td>
-      <td><button onclick="hapusDipilih('${key}')">❌</button></td>
-    </tr>`;
-  });
-  html += `</tbody></table></div>`;
-  fileTerpilihEl.innerHTML = html;
-}
-
-// --- Hapus dari File Terpilih ---
-function hapusDipilih(key) {
-  selectedFiles.delete(key);
-  updateSelectedList();
-  cari(); // refresh checkbox
-}
-
-// --- Pilih/Unpilih File ---
-function toggleSelection(checkbox) {
-  const key = checkbox.getAttribute("data-key");
-  const [name, revisi, url] = key.split("|");
-  if (checkbox.checked) {
-    selectedFiles.set(key, { name, revisi, url });
-  } else {
-    selectedFiles.delete(key);
-  }
-  updateSelectedList();
-}
-
-// --- Pilih Semua ---
-function toggleAll(source) {
-  const checkboxes = document.querySelectorAll("input[type='checkbox'].item-check");
-  checkboxes.forEach(cb => {
-    cb.checked = source.checked;
-    cb.dispatchEvent(new Event('change'));
-  });
-}
-
-// --- Fungsi Sorting ---
-function sortTable(column) {
-  if (sortState.column === column) {
-    sortState.asc = !sortState.asc;
-  } else {
-    sortState.column = column;
-    sortState.asc = true;
-  }
-  cari(); // Refresh tabel dengan urutan baru
-}
-
-// --- Fungsi Pencarian & Tampilkan Tabel ---
-function cari() {
-  const keyword = document.getElementById("keyword").value.trim().toLowerCase();
-  if (!keyword) return;
-  const hasil = semuaData.filter(item =>
-    item.name.toLowerCase().includes(keyword)
-  );
-  const fileTerakhir = {};
-  hasil.forEach(file => {
-    const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
-    const revStr = String(file.revisi).trim();
-    let revCompare = /^\d+$/.test(revStr) ? parseInt(revStr) : revStr.toUpperCase().charCodeAt(0);
-    if (!fileTerakhir[key] || revCompare > fileTerakhir[key].revCompare) {
-      fileTerakhir[key] = { ...file, revCompare };
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Web Drawing Loco Platform UGL</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      position: relative;
     }
-  });
-
-  let dataRows = Object.values(fileTerakhir);
-
-  // Sorting jika sortState ada
-  if (sortState.column) {
-    dataRows.sort((a, b) => {
-      let aVal = a[sortState.column];
-      let bVal = b[sortState.column];
-
-      // Untuk REV, jika angka bandingkan sebagai angka
-      if (sortState.column === "revisi") {
-        let aNum = parseInt(aVal, 10);
-        let bNum = parseInt(bVal, 10);
-        if (!isNaN(aNum) && !isNaN(bNum)) {
-          aVal = aNum; bVal = bNum;
-        }
-      }
-
-      if (aVal < bVal) return sortState.asc ? -1 : 1;
-      if (aVal > bVal) return sortState.asc ? 1 : -1;
-      return 0;
-    });
-  }
-
-  let html = `<div class='table-wrapper'><table>
-    <thead>
-      <tr>
-        <th><input type='checkbox' onclick='toggleAll(this)'> All</th>
-        <th class="file-name sortable" onclick="sortTable('name')">
-          Nama File <span id="sort-name"></span>
-        </th>
-        <th class="sortable" onclick="sortTable('revisi')">
-          REV <span id="sort-revisi"></span>
-        </th>
-        <th>Link PDF</th>
-      </tr>
-    </thead>
-    <tbody>`;
-
-  dataRows.forEach(file => {
-    const fileKey = `${file.name}|${file.revisi}|${file.url}`;
-    const isChecked = selectedFiles.has(fileKey) ? "checked" : "";
-    html += `<tr>
-      <td><input type='checkbox' class='item-check' data-key="${fileKey}" onchange="toggleSelection(this)" ${isChecked}></td>
-      <td class="file-name">${file.name}</td>
-      <td>${file.revisi}</td>
-      <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
-    </tr>`;
-  });
-
-  html += "</tbody></table></div>";
-  hasilEl.innerHTML = html;
-  exportArea.style.display = "block";
-  loadingStatus.style.display = "none";
-  updateSelectedList();
-
-  // Update icon sort
-  document.getElementById("sort-name").textContent =
-    sortState.column === "name" ? (sortState.asc ? "▲" : "▼") : "";
-  document.getElementById("sort-revisi").textContent =
-    sortState.column === "revisi" ? (sortState.asc ? "▲" : "▼") : "";
-}
-
-// --- Export ke Excel ---
-function exportToExcel() {
-  if (selectedFiles.size === 0) {
-    alert("❗ Pilih minimal satu file terlebih dahulu.");
-    return;
-  }
-  const data = [["Nama File", "REV", "Link PDF"]];
-  selectedFiles.forEach(file => {
-    data.push([file.name, file.revisi, file.url]);
-  });
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "File Terpilih");
-  XLSX.writeFile(wb, "file_terpilih.xlsx");
-}
+    body::before {
+      content: "";
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url('image.jpg');
+      background-size: cover;
+      background-position: center;
+      filter: blur(2px);
+      z-index: -1;
+    }
+    header {
+      display: flex; justify-content: space-between; align-items: center;
+      background-color: rgba(255,255,255,0.92);
+      padding: 10px 20px;
+    }
+    .logo-left img { height: 20px; }
+    .logo-right img { height: 30px; }
+    .container {
+      background-color: rgba(255,255,255,0.92);
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    h2 { text-align: center; margin-bottom: 25px; }
+    .search-bar {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+      margin-bottom: 20px;
+    }
+    .search-bar input {
+      flex: 1;
+      min-width: 250px;
+      height: 42px;
+      padding: 0 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    .search-bar button {
+      height: 42px;
+      padding: 0 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #f3f3f3; }
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { background: #eaeaea; }
+    .file-name {
+      word-break: break-word;
+      white-space: normal;
+      max-width: 200px;
+    }
+    .export-area {
+      text-align: center;
+      margin-top: 20px;
+      display: none;
+    }
+    .export-area button {
+      background-color: #28a745;
+      color: white;
+      font-size: 16px;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .copyright { text-align: center; margin: 20px 0; font-size: 13px; color: white; }
+    #loading-status { text-align: center; font-weight: bold; margin-top: 20px; font-size: 16px; }
+    .dot-animate::after { content: '...'; animation: dotFlash 1.5s steps(4, end) infinite; }
+    @keyframes dotFlash {
+      0% { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75% { content: '...'; }
+      100% { content: ''; }
+    }
+    @media (max-width: 600px) {
+      .logo-left img { height: 18px; }
+      .logo-right img { height: 24px; }
+      table, th, td { font-size: 12px; }
+      .file-name { max-width: 90px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-left">
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
+      <img src="https://wp.logos-download.com/wp-content/uploads/2016/07/CIMIC_logo.png?dl" alt="Logo CIMIC">
+    </div>
+    <div class="logo-right">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
+    </div>
+  </header>
+  <div class="container">
+    <h2>Drawing Loco Platform UGL</h2>
+    <div class="search-bar">
+      <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)">
+      <button onclick="cari()">Cari</button>
+    </div>
+    <div id="loading-status" class="dot-animate">⏳ Memuat data</div>
+    <div id="file-terpilih"></div>
+    <div id="hasil"></div>
+    <div class="export-area" id="export-area">
+      <button onclick="exportToExcel()">📥 Export File Terpilih (.xlsx)</button>
+    </div>
+  </div>
+  <div class="copyright">© Abdany Afiq Khoiri</div>
+  <script>
+    // --- Variabel Global ---
+    const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
+    let semuaData = [];
+    const selectedFiles = new Map();
+    const hasilEl = document.getElementById("hasil");
+    const fileTerpilihEl = document.getElementById("file-terpilih");
+    const loadingStatus = document.getElementById("loading-status");
+    const exportArea = document.getElementById("export-area");
