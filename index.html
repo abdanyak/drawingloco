@@ -151,10 +151,16 @@
     }
 
     .copyright {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
       text-align: center;
-      margin-top: 40px;
+      padding: 10px 0;
       font-size: 13px;
-      color: #444;
+      color: white;
+      background: none;
+      z-index: 999;
     }
 
     @media (max-width: 600px) {
@@ -251,7 +257,7 @@
         exportArea.style.display = "block";
       }
 
-      // Sembunyikan status setelah pencarian
+      // Sembunyikan loading status setelah pencarian
       loadingStatus.style.display = "none";
     }
 
