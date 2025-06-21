@@ -16,7 +16,7 @@
 <body>
 
   <h2>🔍 Cari File PDF - Revisi Terakhir</h2>
-  <input type="text" id="keyword" placeholder="Contoh: 117622 atau COW_CATCHER" />
+  <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)" />
   <button onclick="cari()">Cari</button>
 
   <div id="hasil" style="margin-top: 20px;"></div>
@@ -25,7 +25,7 @@
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
     let semuaData = [];
 
-    // Fetch data dari Google Apps Script
+    // Ambil data dari Google Apps Script saat awal
     fetch(url)
       .then(res => res.json())
       .then(json => {
@@ -37,60 +37,40 @@
         console.error(err);
       });
 
-  function cari() {
-  const kata = document.getElementById("keyword").value.trim().toLowerCase();
-  if (!kata) return;
+    function cari() {
+      const keyword = document.getElementById("keyword").value.trim().toLowerCase();
+      if (!keyword) return;
 
-  const hasil = semuaData.filter(item =>
-    item.name.toLowerCase().includes(kata)
-  );
+      const hasil = semuaData.filter(item =>
+        item.name.toLowerCase().includes(keyword)
+      );
 
-  if (hasil.length === 0) {
-    document.getElementById("hasil").innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
-    return;
-  }
+      if (hasil.length === 0) {
+        document.getElementById("hasil").innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
+        return;
+      }
 
-  // Ambil hanya revisi terakhir
-  const fileTerakhir = {};
-  hasil.forEach(file => {
-    const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
-
-    // Ambil nilai pembanding dari revisi (huruf = ASCII, angka tetap)
-    const match = String(file.revisi).match(/[A-Z0-9]+/i);
-    const revForCompare = match ? (isNaN(match[0]) ? match[0].charCodeAt(0) : parseInt(match[0])) : 0;
-
-    if (!fileTerakhir[key] || revForCompare > fileTerakhir[key].revForCompare) {
-      fileTerakhir[key] = { ...file, revForCompare };
-    }
-  });
-
-  // Tampilkan
-  let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr>";
-  Object.values(fileTerakhir).forEach(file => {
-    html += `
-      <tr>
-        <td>${file.name}</td>
-        <td>${file.revisi}</td>
-        <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
-      </tr>`;
-  });
-  html += "</table>";
-
-  document.getElementById("hasil").innerHTML = html;
-}
-
-
-      // Ambil hanya revisi terakhir per kombinasi Kode + Kode Lanjutan + Halaman
+      // Kelompokkan berdasarkan kombinasi Kode + Kode Lanjutan + Halaman
       const fileTerakhir = {};
       hasil.forEach(file => {
         const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
-        const rev = parseInt(file.revisi) || 0;
-        if (!fileTerakhir[key] || rev > fileTerakhir[key].revisi) {
-          fileTerakhir[key] = { ...file, revisi: rev };
+
+        // Ambil angka atau huruf dari revisi sebagai pembanding
+        const revStr = String(file.revisi).trim();
+        let revCompare = 0;
+
+        if (/^\d+$/.test(revStr)) {
+          revCompare = parseInt(revStr); // numerik seperti 01, 02
+        } else if (/^[A-Z]$/i.test(revStr)) {
+          revCompare = revStr.toUpperCase().charCodeAt(0); // huruf jadi ASCII
+        }
+
+        if (!fileTerakhir[key] || revCompare > fileTerakhir[key].revCompare) {
+          fileTerakhir[key] = { ...file, revCompare };
         }
       });
 
-      // Tampilkan hasil
+      // Buat tampilan tabel
       let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr>";
       Object.values(fileTerakhir).forEach(file => {
         html += `
@@ -98,8 +78,7 @@
             <td>${file.name}</td>
             <td>${file.revisi}</td>
             <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
-          </tr>
-        `;
+          </tr>`;
       });
       html += "</table>";
 
