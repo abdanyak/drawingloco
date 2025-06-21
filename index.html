@@ -1,60 +1,81 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- font google -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Sacramento&family=Urbanist:wght@400;900&display=swap"
-        rel="stylesheet">
-    <!-- awsm font -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css"
-        integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="style.css">
-    <title>✨ TO DO LIST ✨</title>
+  <meta charset="UTF-8">
+  <title>Pencarian File PDF Revisi Terakhir</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; }
+    input { padding: 8px; width: 70%; margin-right: 10px; font-size: 16px; }
+    button { padding: 8px 14px; font-size: 16px; cursor: pointer; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #f3f3f3; }
+    a { color: blue; text-decoration: underline; }
+  </style>
 </head>
 <body>
-    <header>
-        <!-- navbar auto responsive -->
-        <section>
-            <nav id="navbar" class="navibar">
-                <a href="#Home" class="active">Home</a>
-                <a href="https://github.com/abdanyak/to-do-list">Github</a>
-                <a href="javascript:void(0);" class="icon" onclick="showMobileNav()">
-                    <i class="fa fa-bars"></i>
-                </a>
-            </nav>
-        </section>
-    </header>
-    <main>
-        <div class="todo-wrapper">
-            <div class="header-add">
-                <h1>MY TO DO LIST</h1>
-                <p>Double-click an item to mark it complete.</p>
-            </div>
 
-            <div class="todo-adder">
-                <input type="text" id="todo-entry-box" />
-                <button id="add-btn" class="submit-button">Submit</button>
-            </div>
-        </div>
-        <div class="list-content">
-            <h1>List</h1>
-            <ol id="todo-list">
-                <!-- isi data -->
-            </ol>
-            <div id="control-wrapper">
-                <button id="clear-btn" onclick="clearSelectedToDoItems()" class="pretty-button">Clear Selected</button>
-                <button id="empty-btn" onclick="emptyList()" class="pretty-button">Empty List</button>
-                <button id="save-btn" onclick="saveList()" class="pretty-button">Save List</button>
-            </div>
-        </div>
-    </main>
-    <footer>
-        <p>by Abdany Afiq Khoiri</p>
-    </footer>
-    <script src="script.js"></script>
+  <h2>🔍 Cari File PDF - Revisi Terakhir</h2>
+  <input type="text" id="keyword" placeholder="Contoh: 117622 atau COW_CATCHER" />
+  <button onclick="cari()">Cari</button>
+
+  <div id="hasil" style="margin-top: 20px;"></div>
+
+  <script>
+    const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
+    let semuaData = [];
+
+    // Fetch data dari Google Apps Script
+    fetch(url)
+      .then(res => res.json())
+      .then(json => {
+        semuaData = json;
+        console.log("✅ Data berhasil dimuat:", semuaData.length, "file");
+      })
+      .catch(err => {
+        document.getElementById("hasil").innerHTML = "⚠️ Gagal mengambil data dari server.";
+        console.error(err);
+      });
+
+    function cari() {
+      const kata = document.getElementById("keyword").value.trim().toLowerCase();
+      if (!kata) return;
+
+      const hasil = semuaData.filter(item =>
+        item.name.toLowerCase().includes(kata)
+      );
+
+      if (hasil.length === 0) {
+        document.getElementById("hasil").innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
+        return;
+      }
+
+      // Ambil hanya revisi terakhir per kombinasi Kode + Kode Lanjutan + Halaman
+      const fileTerakhir = {};
+      hasil.forEach(file => {
+        const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
+        const rev = parseInt(file.revisi) || 0;
+        if (!fileTerakhir[key] || rev > fileTerakhir[key].revisi) {
+          fileTerakhir[key] = { ...file, revisi: rev };
+        }
+      });
+
+      // Tampilkan hasil
+      let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr>";
+      Object.values(fileTerakhir).forEach(file => {
+        html += `
+          <tr>
+            <td>${file.name}</td>
+            <td>${file.revisi}</td>
+            <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
+          </tr>
+        `;
+      });
+      html += "</table>";
+
+      document.getElementById("hasil").innerHTML = html;
+    }
+  </script>
+
 </body>
 </html>
