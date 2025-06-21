@@ -121,6 +121,18 @@
       min-height: 24px;
     }
 
+    @keyframes loadingDots {
+      0% { content: "."; }
+      33% { content: ".."; }
+      66% { content: "..."; }
+      100% { content: "."; }
+    }
+
+    #loading-status.loading::after {
+      content: "...";
+      animation: loadingDots 1.2s infinite;
+    }
+
     .export-area {
       text-align: center;
       margin-top: 10px;
@@ -168,7 +180,7 @@
     </div>
 
     <div id="hasil"></div>
-    <div id="loading-status">⏳ Memuat data...</div>
+    <div id="loading-status" class="loading">⏳ Memuat data</div>
     <div class="export-area" id="export-area">
       <div>✅ Siap digunakan</div>
       <button onclick="exportToExcel()">📥 Export ke Excel</button>
@@ -190,10 +202,12 @@
       .then(res => res.json())
       .then(json => {
         semuaData = json;
-        loadingStatus.innerHTML = "✅ Siap digunakan";
+        loadingStatus.textContent = "✅ Siap digunakan";
+        loadingStatus.classList.remove("loading");
       })
       .catch(err => {
-        loadingStatus.innerHTML = "⚠️ Gagal mengambil data";
+        loadingStatus.textContent = "⚠️ Gagal mengambil data";
+        loadingStatus.classList.remove("loading");
         console.error(err);
       });
 
@@ -235,8 +249,10 @@
 
         hasilEl.innerHTML = html;
         exportArea.style.display = "block";
-        loadingStatus.style.display = "none"; // hide after search
       }
+
+      // Sembunyikan status setelah pencarian
+      loadingStatus.style.display = "none";
     }
 
     function exportToExcel() {
