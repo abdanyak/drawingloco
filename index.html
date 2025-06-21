@@ -37,18 +37,48 @@
         console.error(err);
       });
 
-    function cari() {
-      const kata = document.getElementById("keyword").value.trim().toLowerCase();
-      if (!kata) return;
+  function cari() {
+  const kata = document.getElementById("keyword").value.trim().toLowerCase();
+  if (!kata) return;
 
-      const hasil = semuaData.filter(item =>
-        item.name.toLowerCase().includes(kata)
-      );
+  const hasil = semuaData.filter(item =>
+    item.name.toLowerCase().includes(kata)
+  );
 
-      if (hasil.length === 0) {
-        document.getElementById("hasil").innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
-        return;
-      }
+  if (hasil.length === 0) {
+    document.getElementById("hasil").innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
+    return;
+  }
+
+  // Ambil hanya revisi terakhir
+  const fileTerakhir = {};
+  hasil.forEach(file => {
+    const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
+
+    // Ambil nilai pembanding dari revisi (huruf = ASCII, angka tetap)
+    const match = String(file.revisi).match(/[A-Z0-9]+/i);
+    const revForCompare = match ? (isNaN(match[0]) ? match[0].charCodeAt(0) : parseInt(match[0])) : 0;
+
+    if (!fileTerakhir[key] || revForCompare > fileTerakhir[key].revForCompare) {
+      fileTerakhir[key] = { ...file, revForCompare };
+    }
+  });
+
+  // Tampilkan
+  let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr>";
+  Object.values(fileTerakhir).forEach(file => {
+    html += `
+      <tr>
+        <td>${file.name}</td>
+        <td>${file.revisi}</td>
+        <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
+      </tr>`;
+  });
+  html += "</table>";
+
+  document.getElementById("hasil").innerHTML = html;
+}
+
 
       // Ambil hanya revisi terakhir per kombinasi Kode + Kode Lanjutan + Halaman
       const fileTerakhir = {};
