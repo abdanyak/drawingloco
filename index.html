@@ -82,6 +82,8 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
+      table-layout: auto;
+      word-break: break-word;
     }
     th, td {
       border: 1px solid #ccc;
@@ -89,15 +91,11 @@
       text-align: left;
       vertical-align: top;
     }
-    th {
-      background-color: #f3f3f3;
-    }
-    a {
-      color: #007bff;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
+    th { background-color: #f3f3f3; }
+    td:first-child {
+      max-width: 300px;
+      white-space: normal;
+      word-wrap: break-word;
     }
     .export-area {
       text-align: center;
@@ -115,40 +113,36 @@
     }
     .copyright {
       text-align: center;
+      margin: 20px 0;
       font-size: 13px;
       color: white;
-      margin-top: 40px;
     }
-
     #loading-status {
       text-align: center;
       font-weight: bold;
       margin-top: 20px;
-      font-size: 16px;
+      min-height: 24px;
+      animation: loadingDots 1.2s steps(1, end) infinite;
     }
-    .loading::after {
-      content: " ";
-      display: inline-block;
-      width: 1em;
-      text-align: left;
-      animation: dots 1.2s steps(3, end) infinite;
+    @keyframes loadingDots {
+      0% { content: "⏳ Memuat data."; }
+      33% { content: "⏳ Memuat data.."; }
+      66% { content: "⏳ Memuat data..."; }
+      100% { content: "⏳ Memuat data."; }
     }
-    @keyframes dots {
-      0% { content: ""; }
-      33% { content: "."; }
-      66% { content: ".."; }
-      100% { content: "..."; }
-    }
-
     @media (max-width: 600px) {
       .logo-left img { height: 18px; }
       .logo-right img { height: 24px; }
-      table, th, td { font-size: 12px; }
+      table, thead, tbody, th, td, tr { font-size: 12px; }
+      td:first-child {
+        max-width: 100%;
+        word-break: break-word;
+        white-space: normal;
+      }
     }
   </style>
 </head>
 <body>
-
   <header>
     <div class="logo-left">
       <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
@@ -161,15 +155,14 @@
 
   <div class="container">
     <h2>Drawing Loco Platform UGL</h2>
-
     <div class="search-bar">
       <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)" />
       <button onclick="cari()">Cari</button>
     </div>
 
-    <div id="loading-status" class="loading">⏳ Memuat data</div>
+    <div id="loading-status">⏳ Memuat data...</div>
+    <div id="file-terpilih"></div>
     <div id="hasil"></div>
-
     <div class="export-area" id="export-area">
       <button onclick="exportToExcel()">📥 Export File Terpilih (.xlsx)</button>
     </div>
@@ -185,6 +178,7 @@
     const selectedFiles = new Map();
 
     const hasilEl = document.getElementById("hasil");
+    const fileTerpilihEl = document.getElementById("file-terpilih");
     const loadingStatus = document.getElementById("loading-status");
     const exportArea = document.getElementById("export-area");
 
@@ -201,6 +195,49 @@
         console.error(err);
       });
 
+    function updateSelectedList() {
+      if (selectedFiles.size === 0) {
+        fileTerpilihEl.innerHTML = "";
+        return;
+      }
+
+      let html = `<div class='table-wrapper'>
+        <h3>📌 File Terpilih</h3>
+        <table>
+          <thead><tr><th>Nama File</th><th>REV</th><th>Link PDF</th><th>Hapus</th></tr></thead>
+          <tbody>`;
+
+      selectedFiles.forEach((file, key) => {
+        html += `
+          <tr>
+            <td>${file.name}</td>
+            <td>${file.revisi}</td>
+            <td><a href="${file.url}" target="_blank">📄 Lihat</a></td>
+            <td><button onclick="hapusDipilih('${key}')">Hapus</button></td>
+          </tr>`;
+      });
+
+      html += `</tbody></table></div>`;
+      fileTerpilihEl.innerHTML = html;
+    }
+
+    function hapusDipilih(key) {
+      selectedFiles.delete(key);
+      updateSelectedList();
+      cari();
+    }
+
+    function toggleSelection(checkbox) {
+      const key = checkbox.getAttribute("data-key");
+      if (checkbox.checked) {
+        const [name, revisi, url] = key.split("|");
+        selectedFiles.set(key, { name, revisi, url });
+      } else {
+        selectedFiles.delete(key);
+      }
+      updateSelectedList();
+    }
+
     function cari() {
       const keyword = document.getElementById("keyword").value.trim().toLowerCase();
       if (!keyword) return;
@@ -208,12 +245,6 @@
       const hasil = semuaData.filter(item =>
         item.name.toLowerCase().includes(keyword)
       );
-
-      if (hasil.length === 0) {
-        hasilEl.innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
-        exportArea.style.display = "none";
-        return;
-      }
 
       const fileTerakhir = {};
       hasil.forEach(file => {
@@ -226,47 +257,24 @@
         }
       });
 
-      const filesSorted = Object.values(fileTerakhir);
-      const dipilih = [];
-      const tidakDipilih = [];
-
-      filesSorted.forEach(file => {
-        const key = `${file.name}|${file.revisi}|${file.url}`;
-        if (selectedFiles.has(key)) {
-          dipilih.push({ ...file, fileKey: key });
-        } else {
-          tidakDipilih.push({ ...file, fileKey: key });
-        }
-      });
-
-      const finalList = [...dipilih, ...tidakDipilih];
       let html = "<div class='table-wrapper'><table><thead><tr><th>Pilih</th><th>Nama File</th><th>REV</th><th>Link PDF</th></tr></thead><tbody>";
-
-      finalList.forEach(file => {
-        const isChecked = selectedFiles.has(file.fileKey) ? "checked" : "";
+      Object.values(fileTerakhir).forEach(file => {
+        const fileKey = `${file.name}|${file.revisi}|${file.url}`;
+        const isChecked = selectedFiles.has(fileKey) ? "checked" : "";
         html += `
           <tr>
-            <td><input type="checkbox" onchange="toggleSelection(this)" data-key="${file.fileKey}" ${isChecked}></td>
+            <td><input type="checkbox" onchange="toggleSelection(this)" data-key="${fileKey}" ${isChecked}></td>
             <td>${file.name}</td>
             <td>${file.revisi}</td>
             <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
           </tr>`;
       });
-
       html += "</tbody></table></div>";
+
       hasilEl.innerHTML = html;
       exportArea.style.display = "block";
       loadingStatus.style.display = "none";
-    }
-
-    function toggleSelection(checkbox) {
-      const key = checkbox.getAttribute("data-key");
-      if (checkbox.checked) {
-        const [name, revisi, url] = key.split("|");
-        selectedFiles.set(key, { name, revisi, url });
-      } else {
-        selectedFiles.delete(key);
-      }
+      updateSelectedList();
     }
 
     function exportToExcel() {
