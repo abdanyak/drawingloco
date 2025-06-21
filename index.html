@@ -71,7 +71,6 @@
       font-size: 16px;
       border-radius: 6px;
       border: 1px solid #ccc;
-      line-height: 42px;
     }
 
     .search-bar button {
@@ -83,7 +82,6 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      line-height: 42px;
     }
 
     table {
@@ -113,14 +111,26 @@
     }
 
     #hasil {
-      margin-bottom: 40px;
+      margin-bottom: 20px;
     }
 
     #loading-status {
       text-align: center;
       font-weight: bold;
-      margin-top: 20px;
+      margin: 20px 0;
       min-height: 24px;
+    }
+
+    #export-btn {
+      display: none;
+      margin: 0 auto 40px;
+      padding: 10px 20px;
+      font-size: 15px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
     }
 
     @keyframes dots {
@@ -141,19 +151,24 @@
         max-height: 40px;
       }
     }
+
+    footer {
+      text-align: center;
+      padding: 20px 0;
+      color: #555;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
-
-    <!-- 🖼️ Logo Area (UGL kiri, INKA kanan) -->
     <div class="logo-area">
       <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
       <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
     </div>
 
-    <h2>Drawing Loco PLatform UGL</h2>
+    <h2>Drawing Loco Platform UGL</h2>
 
     <div class="search-bar">
       <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)" />
@@ -162,19 +177,30 @@
 
     <div id="hasil"></div>
     <div id="loading-status"></div>
+    <button id="export-btn" onclick="exportExcel()">📤 Export ke Excel</button>
   </div>
 
+  <footer>
+    &copy; 2025 Abdany Afiq Khoiri. All rights reserved.
+  </footer>
+
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script>
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
     let semuaData = [];
+    let hasilTabel = [];
 
-    function setLoadingStatus(status, isLoading = false) {
+    function setLoadingStatus(status, isLoading = false, showExport = false) {
       const el = document.getElementById("loading-status");
+      const btn = document.getElementById("export-btn");
       el.textContent = status;
+
       if (isLoading) {
         el.classList.add("loading-text");
+        btn.style.display = "none";
       } else {
         el.classList.remove("loading-text");
+        btn.style.display = showExport ? "block" : "none";
       }
     }
 
@@ -226,8 +252,10 @@
         }
       });
 
+      hasilTabel = Object.values(fileTerakhir);
+
       let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr>";
-      Object.values(fileTerakhir).forEach(file => {
+      hasilTabel.forEach(file => {
         html += `
           <tr>
             <td>${file.name}</td>
@@ -238,7 +266,25 @@
       html += "</table>";
 
       document.getElementById("hasil").innerHTML = html;
-      setLoadingStatus("✅ Siap digunakan", false);
+      setLoadingStatus("✅ Siap digunakan", false, true);
+    }
+
+    function exportExcel() {
+      if (hasilTabel.length === 0) {
+        alert("Tidak ada data untuk diekspor.");
+        return;
+      }
+
+      const wsData = hasilTabel.map(file => ({
+        "Nama File": file.name,
+        "REV": file.revisi,
+        "Link PDF": file.url
+      }));
+
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(wsData);
+      XLSX.utils.book_append_sheet(wb, ws, "Data Revisi");
+      XLSX.writeFile(wb, "Revisi_Terakhir_Drawing.xlsx");
     }
   </script>
 
