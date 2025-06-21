@@ -28,6 +28,7 @@
       z-index: -1;
     }
 
+    /* NAVBAR HEADER */
     .navbar {
       display: flex;
       justify-content: space-between;
@@ -37,17 +38,22 @@
       top: 0;
       left: 0;
       right: 0;
-      background-color: rgba(255, 255, 255, 0.92);
+      background-color: rgba(255, 255, 255, 0.5);
       backdrop-filter: blur(4px);
       z-index: 10;
     }
 
-    .navbar .left-logos img {
-      height: 20px;
-      margin-right: 10px;
+    .navbar-left, .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .navbar .right-logo img {
+    .navbar-left img {
+      height: 20px;
+    }
+
+    .navbar-right img {
       height: 30px;
     }
 
@@ -131,18 +137,6 @@
       min-height: 24px;
     }
 
-    @keyframes loadingDots {
-      0% { content: "."; }
-      33% { content: ".."; }
-      66% { content: "..."; }
-      100% { content: "."; }
-    }
-
-    #loading-status.loading::after {
-      content: "...";
-      animation: loadingDots 1.2s infinite;
-    }
-
     .export-area {
       text-align: center;
       margin-top: 10px;
@@ -167,38 +161,25 @@
       left: 0;
       right: 0;
       font-size: 13px;
-      color: #000;
-      background-color: rgba(255, 255, 255, 0.92);
-      padding: 5px 0;
-    }
-
-    @media (max-width: 600px) {
-      .navbar {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .navbar .left-logos img,
-      .navbar .right-logo img {
-        height: 24px !important;
-      }
+      color: white;
+      background: none;
     }
   </style>
 </head>
 <body>
 
-  <!-- Navbar Header -->
+  <!-- NAVBAR HEADER -->
   <div class="navbar">
-    <div class="left-logos">
+    <div class="navbar-left">
       <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
       <img src="https://wp.logos-download.com/wp-content/uploads/2016/07/CIMIC_logo.png?dl" alt="Logo CIMIC">
     </div>
-    <div class="right-logo">
+    <div class="navbar-right">
       <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
     </div>
   </div>
 
-  <!-- Konten utama -->
+  <!-- KONTEN UTAMA -->
   <div class="container">
     <h2>Drawing Loco Platform UGL</h2>
 
@@ -215,12 +196,10 @@
     </div>
   </div>
 
-  <!-- Copyright -->
   <div class="copyright">
     © Abdany Afiq Khoiri
   </div>
 
-  <!-- Script -->
   <script>
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
     let semuaData = [];
@@ -281,7 +260,6 @@
         exportArea.style.display = "block";
       }
 
-      // Sembunyikan status siap digunakan setelah pencarian
       loadingStatus.style.display = "none";
     }
 
@@ -297,6 +275,5 @@
       a.click();
     }
   </script>
-
 </body>
 </html>
