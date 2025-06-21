@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pencarian File PDF Revisi Terakhir</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cari File PDF - Revisi Terakhir</title>
   <style>
     * {
       box-sizing: border-box;
@@ -16,26 +16,25 @@
       min-height: 100vh;
     }
 
-    /* Background image with full blur, no opacity */
+    /* Full background with blur */
     body::before {
       content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
       background-image: url('https://media.licdn.com/dms/image/v2/C5605AQF-8cSaDlhrtQ/feedshare-thumbnail_720_1280/feedshare-thumbnail_720_1280/0/1659938691153?e=2147483647&v=beta&t=1oR4qJCLb-iSWTnF3sLHhETQQ9b0pPAPb3Op8cLfY0Q');
       background-size: cover;
       background-position: center;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      z-index: -1;
       filter: blur(10px);
+      z-index: -1;
     }
 
     .container {
       background-color: rgba(255, 255, 255, 0.92);
       max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 30px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      margin: 40px auto;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
     }
 
     h2 {
@@ -43,41 +42,49 @@
       margin-bottom: 20px;
     }
 
-    input[type="text"] {
+    .search-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .search-bar input[type="text"] {
+      flex: 1;
+      min-width: 250px;
       padding: 10px;
-      width: 100%;
       font-size: 16px;
-      margin-bottom: 10px;
-      border-radius: 5px;
+      border-radius: 6px;
       border: 1px solid #ccc;
     }
 
-    button {
-      width: 100%;
-      padding: 10px;
+    .search-bar button {
+      padding: 10px 20px;
       font-size: 16px;
       background-color: #007bff;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
+      height: 42px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
       font-size: 14px;
+      margin-top: 20px;
     }
 
     th, td {
       border: 1px solid #ccc;
       padding: 10px;
+      text-align: left;
     }
 
     th {
       background-color: #f3f3f3;
-      text-align: left;
     }
 
     a {
@@ -88,32 +95,17 @@
     a:hover {
       text-decoration: underline;
     }
-
-    @media (min-width: 600px) {
-      input[type="text"], button {
-        width: auto;
-        display: inline-block;
-      }
-
-      input[type="text"] {
-        width: 70%;
-        margin-right: 10px;
-      }
-
-      button {
-        width: auto;
-      }
-    }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h2>🔍 Cari File PDF - Revisi Terakhir</h2>
-    <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)" />
-    <button onclick="cari()">Cari</button>
-
-    <div id="hasil" style="margin-top: 20px;"></div>
+    <div class="search-bar">
+      <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)" />
+      <button onclick="cari()">Cari</button>
+    </div>
+    <div id="hasil"></div>
   </div>
 
   <script>
@@ -127,7 +119,7 @@
         console.log("✅ Data berhasil dimuat:", semuaData.length, "file");
       })
       .catch(err => {
-        document.getElementById("hasil").innerHTML = "⚠️ Gagal mengambil data dari server.";
+        document.getElementById("hasil").innerHTML = "⚠️ Gagal mengambil data.";
         console.error(err);
       });
 
