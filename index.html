@@ -6,41 +6,41 @@
   <title>Web Drawing Loco Platform UGL</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    * { box-sizing: border-box; }
     body {
-      margin: 0; padding: 0;
+      margin: 0;
+      padding: 0;
       font-family: 'Segoe UI', sans-serif;
       min-height: 100vh;
-      position: relative;
-    }
-    body::before {
-      content: "";
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background-image: url('image.jpg');
       background-size: cover;
       background-position: center;
-      filter: blur(2px);
-      z-index: -1;
-		background-attachment: fixed; /* Tambahkan baris ini */
+      background-attachment: fixed;
+      background-repeat: no-repeat;
     }
     header {
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       background-color: rgba(255,255,255,0.92);
       padding: 10px 20px;
     }
     .logo-left img { height: 20px; }
     .logo-right img { height: 30px; }
     .container {
-      background-color: rgba(255,255,255,0.92);
+      background: rgba(255,255,255,0.92);
       max-width: 900px;
       margin: 40px auto;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      backdrop-filter: blur(2px);
     }
     h2 { text-align: center; margin-bottom: 25px; }
     .search-bar {
-      display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
       margin-bottom: 20px;
     }
     .search-bar input {
@@ -66,11 +66,26 @@
       overflow-x: auto;
       margin-top: 20px;
     }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-    th { background-color: #f3f3f3; }
-    th.sortable { cursor: pointer; user-select: none; }
-    th.sortable:hover { background: #eaeaea; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f3f3f3;
+    }
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+    th.sortable:hover {
+      background: #eaeaea;
+    }
     .file-name {
       word-break: break-word;
       white-space: normal;
@@ -90,8 +105,18 @@
       border-radius: 8px;
       cursor: pointer;
     }
-    .copyright { text-align: center; margin: 20px 0; font-size: 13px; color: white; }
-    #loading-status { text-align: center; font-weight: bold; margin-top: 20px; font-size: 16px; }
+    .copyright {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 13px;
+      color: white;
+    }
+    #loading-status {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 20px;
+      font-size: 16px;
+    }
     .dot-animate::after { content: '...'; animation: dotFlash 1.5s steps(4, end) infinite; }
     @keyframes dotFlash {
       0% { content: ''; }
@@ -171,7 +196,7 @@
       <table>
         <thead>
           <tr>
-            <th class="file-name">Nama File</th>
+            <file-name">Nama File</th>
             <th>REV</th>
             <th>Link</th>
             <th>Hapus</th>
@@ -310,15 +335,7 @@
 
     // --- Export ke Excel ---
     function exportToExcel() {
-      if (selectedFiles.size === 0) {
-        alert("❗ Pilih minimal satu file terlebih dahulu.");
-        return;
-      }
-      const data = [["Nama File", "REV", "Link PDF"]];
-      selectedFiles.forEach(file => {
-        data.push([file.name, file.revisi, file.url]);
-      });
-      const ws = XLSX.utils.aoa_to_sheet(data);
+      if (selectedFiles.size = XLSX.utils.aoa_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "File Terpilih");
       XLSX.writeFile(wb, "file_terpilih.xlsx");
