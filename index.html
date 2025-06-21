@@ -42,13 +42,8 @@
       gap: 10px;
     }
 
-    .logo-left img {
-      height: 20px;
-    }
-
-    .logo-right img {
-      height: 30px;
-    }
+    .logo-left img { height: 20px; }
+    .logo-right img { height: 30px; }
 
     .container {
       background-color: rgba(255, 255, 255, 0.92);
@@ -170,23 +165,16 @@
 
     .copyright {
       text-align: center;
-      position: sticky;
-      bottom: 8px;
-      left: 0;
-      right: 0;
       font-size: 13px;
       color: white;
       background: none;
+      margin-top: 40px;
+      padding-bottom: 16px;
     }
 
     @media (max-width: 600px) {
-      .logo-left img {
-        height: 18px;
-      }
-
-      .logo-right img {
-        height: 24px;
-      }
+      .logo-left img { height: 18px; }
+      .logo-right img { height: 24px; }
 
       table, thead, tbody, th, td, tr {
         font-size: 12px;
@@ -222,6 +210,7 @@
 
     <div id="loading-status" class="loading">⏳ Memuat data</div>
     <div id="hasil"></div>
+
     <div class="export-area" id="export-area">
       <button onclick="exportToExcel()">📥 Export ke Excel</button>
     </div>
@@ -230,6 +219,9 @@
   <div class="copyright">
     © Abdany Afiq Khoiri
   </div>
+
+  <!-- SheetJS untuk export .xlsx -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <script>
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
@@ -276,7 +268,7 @@
           }
         });
 
-        let html = "<div class='table-wrapper'><table><thead><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr></thead><tbody>";
+        let html = "<div class='table-wrapper'><table id='data-table'><thead><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr></thead><tbody>";
         Object.values(fileTerakhir).forEach(file => {
           html += `
             <tr>
@@ -295,15 +287,11 @@
     }
 
     function exportToExcel() {
-      const table = document.querySelector("#hasil table");
+      const table = document.getElementById("data-table");
       if (!table) return;
 
-      const html = table.outerHTML;
-      const url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'hasil_pencarian.xls';
-      a.click();
+      const wb = XLSX.utils.table_to_book(table, { sheet: "Hasil Pencarian" });
+      XLSX.writeFile(wb, "hasil_pencarian.xlsx");
     }
   </script>
 
