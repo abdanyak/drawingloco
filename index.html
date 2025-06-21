@@ -103,16 +103,25 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
+      table-layout: auto;
+      word-break: break-word;
     }
 
     th, td {
       border: 1px solid #ccc;
       padding: 10px;
       text-align: left;
+      vertical-align: top;
     }
 
     th {
       background-color: #f3f3f3;
+    }
+
+    td:first-child {
+      max-width: 300px;
+      white-space: normal;
+      word-wrap: break-word;
     }
 
     a {
@@ -167,7 +176,7 @@
       right: 0;
       font-size: 13px;
       color: white;
-      background-color: rgba(255, 255, 255, 0.92);
+      background: none;
     }
 
     @media (max-width: 600px) {
@@ -181,6 +190,12 @@
 
       table, thead, tbody, th, td, tr {
         font-size: 12px;
+      }
+
+      td:first-child {
+        max-width: 100%;
+        word-break: break-word;
+        white-space: normal;
       }
     }
   </style>
@@ -261,7 +276,7 @@
           }
         });
 
-        let html = "<table><thead><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr></thead><tbody>";
+        let html = "<div class='table-wrapper'><table><thead><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr></thead><tbody>";
         Object.values(fileTerakhir).forEach(file => {
           html += `
             <tr>
@@ -270,9 +285,9 @@
               <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
             </tr>`;
         });
-        html += "</tbody></table>";
+        html += "</tbody></table></div>";
 
-        hasilEl.innerHTML = `<div class="table-wrapper">${html}</div>`;
+        hasilEl.innerHTML = html;
         exportArea.style.display = "block";
       }
 
