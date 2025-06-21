@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Web Drawing Loco Platform UGL</title>
   <style>
     * {
@@ -14,8 +14,7 @@
       padding: 0;
       font-family: 'Segoe UI', sans-serif;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      position: relative;
     }
 
     body::before {
@@ -31,13 +30,11 @@
 
     .container {
       background-color: rgba(255, 255, 255, 0.92);
-      max-width: 720px;
-      margin: auto;
-      margin-top: 60px;
-      padding: 40px 30px;
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 30px;
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
-      text-align: center;
     }
 
     .logo-area {
@@ -54,15 +51,16 @@
     }
 
     h2 {
+      text-align: center;
       margin-bottom: 25px;
     }
 
     .search-bar {
       display: flex;
+      flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
       margin-bottom: 20px;
-      flex-wrap: wrap;
     }
 
     .search-bar input[type="text"] {
@@ -86,15 +84,41 @@
       cursor: pointer;
     }
 
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f3f3f3;
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    #hasil {
+      margin-bottom: 20px;
+    }
+
     #loading-status {
+      text-align: center;
       font-weight: bold;
       margin-top: 20px;
       min-height: 24px;
-    }
-
-    #loading-status.loading::after {
-      content: "...";
-      animation: loadingDots 1.2s infinite;
     }
 
     @keyframes loadingDots {
@@ -104,22 +128,38 @@
       100% { content: "."; }
     }
 
+    #loading-status.loading::after {
+      content: "...";
+      animation: loadingDots 1.2s infinite;
+    }
+
+    .export-area {
+      text-align: center;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .export-area button {
+      background-color: #28a745;
+      color: white;
+      font-size: 16px;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
     .copyright {
       text-align: center;
-      padding: 12px;
+      margin-top: 40px;
       font-size: 13px;
-      color: white;
-      background: none;
-      margin-top: auto;
+      color: #444;
     }
 
     @media (max-width: 600px) {
       .logo-area img {
-        max-height: 36px;
-      }
-
-      .container {
-        margin: 30px 10px;
+        max-height: 40px;
       }
     }
   </style>
@@ -139,7 +179,12 @@
       <button onclick="cari()">Cari</button>
     </div>
 
+    <div id="hasil"></div>
     <div id="loading-status" class="loading">⏳ Memuat data</div>
+    <div class="export-area" id="export-area">
+      <div>✅ Siap digunakan</div>
+      <button onclick="exportToExcel()">📥 Export ke Excel</button>
+    </div>
   </div>
 
   <div class="copyright">
@@ -147,11 +192,16 @@
   </div>
 
   <script>
-    const loadingStatus = document.getElementById("loading-status");
+    const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
+    let semuaData = [];
 
-    fetch("https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec")
+    const loadingStatus = document.getElementById("loading-status");
+    const exportArea = document.getElementById("export-area");
+
+    fetch(url)
       .then(res => res.json())
-      .then(data => {
+      .then(json => {
+        semuaData = json;
         loadingStatus.textContent = "✅ Siap digunakan";
         loadingStatus.classList.remove("loading");
       })
@@ -162,8 +212,59 @@
       });
 
     function cari() {
-      const loading = document.getElementById("loading-status");
-      loading.style.display = "none";
+      const keyword = document.getElementById("keyword").value.trim().toLowerCase();
+      if (!keyword) return;
+
+      const hasil = semuaData.filter(item =>
+        item.name.toLowerCase().includes(keyword)
+      );
+
+      const hasilEl = document.getElementById("hasil");
+
+      if (hasil.length === 0) {
+        hasilEl.innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
+        exportArea.style.display = "none";
+      } else {
+        const fileTerakhir = {};
+        hasil.forEach(file => {
+          const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
+          const revStr = String(file.revisi).trim();
+          let revCompare = /^\d+$/.test(revStr) ? parseInt(revStr) : revStr.toUpperCase().charCodeAt(0);
+
+          if (!fileTerakhir[key] || revCompare > fileTerakhir[key].revCompare) {
+            fileTerakhir[key] = { ...file, revCompare };
+          }
+        });
+
+        let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr>";
+        Object.values(fileTerakhir).forEach(file => {
+          html += `
+            <tr>
+              <td>${file.name}</td>
+              <td>${file.revisi}</td>
+              <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
+            </tr>`;
+        });
+        html += "</table>";
+
+        hasilEl.innerHTML = html;
+        exportArea.style.display = "block";
+      }
+
+      // Sembunyikan status setelah pencarian
+      loadingStatus.style.display = "none";
+    }
+
+    function exportToExcel() {
+      const table = document.querySelector("#hasil table");
+      if (!table) return;
+
+      const html = table.outerHTML;
+      const url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'hasil_pencarian.xls';
+      a.click();
     }
   </script>
 
