@@ -129,8 +129,9 @@
     </div>
   </div>
   <div class="copyright">© Abdany Afiq Khoiri</div>
+
   <script>
-    // Data & Elements
+    // --- Variabel Global ---
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
     let semuaData = [];
     const selectedFiles = new Map();
@@ -139,7 +140,7 @@
     const loadingStatus = document.getElementById("loading-status");
     const exportArea = document.getElementById("export-area");
 
-    // Fetch Data
+    // --- Ambil Data ---
     fetch(url)
       .then(res => res.json())
       .then(json => {
@@ -152,34 +153,42 @@
         console.error(err);
       });
 
-    // Update List Selected
+    // --- Update Daftar File Terpilih ---
     function updateSelectedList() {
       if (selectedFiles.size === 0) {
         fileTerpilihEl.innerHTML = "";
         return;
       }
       let html = `<div class='table-wrapper'><h3>📌 File Terpilih</h3>
-      <table><thead><tr><th class="file-name">Nama File</th><th>REV</th><th>Link</th><th>Hapus</th></tr></thead><tbody>`;
+      <table>
+        <thead>
+          <tr>
+            <th class="file-name">Nama File</th>
+            <th>REV</th>
+            <th>Link</th>
+            <th>Hapus</th>
+          </tr>
+        </thead>
+        <tbody>`;
       selectedFiles.forEach((file, key) => {
         html += `<tr>
           <td class="file-name">${file.name}</td>
           <td>${file.revisi}</td>
-          <td><a href="${file.url}" target="_blank">📄 Lihat</a></td>
-          <td><button onclick="hapusDipilih('${key}')">❌</button></td>
+          <td><a href="${file.url}"</button></td>
         </tr>`;
       });
       html += `</tbody></table></div>`;
       fileTerpilihEl.innerHTML = html;
     }
 
-    // Hapus Dipilih
+    // --- Hapus dari File Terpilih ---
     function hapusDipilih(key) {
       selectedFiles.delete(key);
       updateSelectedList();
       cari(); // refresh checkbox
     }
 
-    // Toggle Selection
+    // --- Pilih/Unpilih File ---
     function toggleSelection(checkbox) {
       const key = checkbox.getAttribute("data-key");
       const [name, revisi, url] = key.split("|");
@@ -191,7 +200,7 @@
       updateSelectedList();
     }
 
-    // Toggle All
+    // --- Pilih Semua ---
     function toggleAll(source) {
       const checkboxes = document.querySelectorAll("input[type='checkbox'].item-check");
       checkboxes.forEach(cb => {
@@ -200,7 +209,7 @@
       });
     }
 
-    // Cari
+    // --- Fungsi Pencarian & Tampilkan Tabel ---
     function cari() {
       const keyword = document.getElementById("keyword").value.trim().toLowerCase();
       if (!keyword) return;
@@ -216,13 +225,22 @@
           fileTerakhir[key] = { ...file, revCompare };
         }
       });
+
       let html = `<div class='table-wrapper'><table>
-        <thead><tr>
-          <th><input type='checkbox' onclick='toggleAll(this)'> All</th>
-          <th class="file-name">Nama File</th>
-          <th>REV</th>
-          <th>Link PDF</th>
-        </tr></thead><tbody>`;
+        <theadcheckbox' onclick='toggleAll(this)'> All</th>
+            <th class="file-name">Nama File</th>
+            <th>REV</th>
+            <th>Link PDF</th>
+          </tr>
+          <tr>
+            <th></th>
+            <th><input type="text" id="filter-nama" style="width:90%" placeholder="Filter Nama File"></th>
+            <th><input type="text" id="filter-rev" style="width:90%" placeholder="Filter REV"></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>`;
+
       Object.values(fileTerakhir).forEach(file => {
         const fileKey = `${file.name}|${file.revisi}|${file.url}`;
         const isChecked = selectedFiles.has(fileKey) ? "checked" : "";
@@ -233,14 +251,34 @@
           <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
         </tr>`;
       });
+
       html += "</tbody></table></div>";
       hasilEl.innerHTML = html;
       exportArea.style.display = "block";
       loadingStatus.style.display = "none";
       updateSelectedList();
+
+      // --- Event Filter Kolom (langsung aktif setelah render tabel) ---
+      document.getElementById("filter-nama").addEventListener("input", applyColumnFilters);
+      document.getElementById("filter-rev").addEventListener("input", applyColumnFilters);
     }
 
-    // Export
+    // --- Filter Baris Tabel Berdasarkan Kolom ---
+    function applyColumnFilters() {
+      const filterNama = document.getElementById("filter-nama").value.trim().toLowerCase();
+      const filterRev = document.getElementById("filter-rev").value.trim().toLowerCase();
+      const rows = hasilEl.querySelectorAll("tbody tr");
+      rows.forEach(row => {
+        const nama = row.children[1].textContent.toLowerCase();
+        const rev = row.children[2].textContent.toLowerCase();
+        let show = true;
+        if (filterNama && !nama.includes(filterNama)) show = false;
+        if (filterRev && !rev.includes(filterRev)) show = false;
+        row.style.display = show ? "" : "none";
+      });
+    }
+
+    // --- Export ke Excel ---
     function exportToExcel() {
       if (selectedFiles.size === 0) {
         alert("❗ Pilih minimal satu file terlebih dahulu.");
