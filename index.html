@@ -2,18 +2,21 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pencarian File PDF Revisi Terakhir</title>
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-      position: relative;
-      min-height: 100vh;
-      background: rgba(255,255,255,0.8);
+    * {
+      box-sizing: border-box;
     }
 
-    /* Background image with blur */
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* Background image with full blur, no opacity */
     body::before {
       content: "";
       background-image: url('https://media.licdn.com/dms/image/v2/C5605AQF-8cSaDlhrtQ/feedshare-thumbnail_720_1280/feedshare-thumbnail_720_1280/0/1659938691153?e=2147483647&v=beta&t=1oR4qJCLb-iSWTnF3sLHhETQQ9b0pPAPb3Op8cLfY0Q');
@@ -22,53 +25,59 @@
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       z-index: -1;
-      filter: blur(2px);
-      opacity: 100;
+      filter: blur(10px);
     }
 
     .container {
-      padding: 30px;
+      background-color: rgba(255, 255, 255, 0.92);
       max-width: 900px;
-      margin: auto;
-      background-color: rgba(255, 255, 255, 0.85);
+      margin: 0 auto;
+      padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
-      margin-top: 40px;
+      margin-top: 30px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
 
-    input {
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
       padding: 10px;
-      width: 65%;
-      margin-right: 10px;
+      width: 100%;
       font-size: 16px;
-      border: 1px solid #ccc;
+      margin-bottom: 10px;
       border-radius: 5px;
+      border: 1px solid #ccc;
     }
 
     button {
-      padding: 10px 14px;
+      width: 100%;
+      padding: 10px;
       font-size: 16px;
-      cursor: pointer;
       background-color: #007bff;
       color: white;
       border: none;
       border-radius: 5px;
+      cursor: pointer;
     }
 
     table {
       width: 100%;
-      margin-top: 20px;
       border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
     }
 
     th, td {
       border: 1px solid #ccc;
       padding: 10px;
-      text-align: left;
     }
 
     th {
       background-color: #f3f3f3;
+      text-align: left;
     }
 
     a {
@@ -78,6 +87,22 @@
 
     a:hover {
       text-decoration: underline;
+    }
+
+    @media (min-width: 600px) {
+      input[type="text"], button {
+        width: auto;
+        display: inline-block;
+      }
+
+      input[type="text"] {
+        width: 70%;
+        margin-right: 10px;
+      }
+
+      button {
+        width: auto;
+      }
     }
   </style>
 </head>
