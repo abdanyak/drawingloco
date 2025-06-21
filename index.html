@@ -2,12 +2,10 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Web Drawing Loco Platform UGL</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html, body {
       margin: 0;
@@ -47,7 +45,6 @@
 
     .logo-area img {
       max-height: 40px;
-      height: auto;
     }
 
     h2 {
@@ -187,6 +184,7 @@
 
     <div id="hasil"></div>
     <div id="loading-status" class="loading">⏳ Memuat data</div>
+    
     <div class="export-area" id="export-area">
       <div>✅ Siap digunakan</div>
       <button onclick="exportToExcel()">📥 Export ke Excel</button>
@@ -255,9 +253,9 @@
 
         hasilEl.innerHTML = html;
         exportArea.style.display = "block";
+        exportArea.querySelector('div').style.display = "none"; // ⛳ Hapus teks "Siap digunakan"
       }
 
-      // Sembunyikan loading status setelah pencarian
       loadingStatus.style.display = "none";
     }
 
