@@ -2,10 +2,12 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Drawing Loco Platform UGL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Web Drawing Loco Platform UGL</title>
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     html, body {
       margin: 0;
@@ -18,14 +20,16 @@
     body::before {
       content: "";
       position: fixed;
-      inset: 0;
-      background: url('https://media.licdn.com/dms/image/v2/C5605AQF-8cSaDlhrtQ/feedshare-thumbnail_720_1280/feedshare-thumbnail_720_1280/0/1659938691153?e=2147483647&v=beta&t=1oR4qJCLb-iSWTnF3sLHhETQQ9b0pPAPb3Op8cLfY0Q') no-repeat center center / cover;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url('https://media.licdn.com/dms/image/v2/C5605AQF-8cSaDlhrtQ/feedshare-thumbnail_720_1280/feedshare-thumbnail_720_1280/0/1659938691153?e=2147483647&v=beta&t=1oR4qJCLb-iSWTnF3sLHhETQQ9b0pPAPb3Op8cLfY0Q');
+      background-size: cover;
+      background-position: center;
       filter: blur(10px);
       z-index: -1;
     }
 
     .container {
-      background: rgba(255, 255, 255, 0.92);
+      background-color: rgba(255, 255, 255, 0.92);
       max-width: 900px;
       margin: 60px auto;
       padding: 30px;
@@ -93,42 +97,52 @@
       text-align: left;
     }
 
-    th { background-color: #f3f3f3; }
+    th {
+      background-color: #f3f3f3;
+    }
 
     a {
       color: #007bff;
       text-decoration: none;
     }
 
-    a:hover { text-decoration: underline; }
-
-    #hasil { margin-bottom: 30px; }
-
-    .export-button {
-      display: none;
-      text-align: center;
-      margin-bottom: 30px;
+    a:hover {
+      text-decoration: underline;
     }
 
-    .export-button button {
+    #hasil {
+      margin-bottom: 20px;
+    }
+
+    #loading-status {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 20px;
+      min-height: 24px;
+    }
+
+    .export-area {
+      text-align: center;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .export-area button {
       background-color: #28a745;
       color: white;
       font-size: 16px;
       border: none;
-      border-radius: 6px;
       padding: 10px 20px;
+      border-radius: 8px;
       cursor: pointer;
+      margin-top: 8px;
     }
 
-    .export-button button:hover {
-      background-color: #218838;
-    }
-
-    .footer {
+    .copyright {
       text-align: center;
-      padding-bottom: 20px;
+      margin-top: 40px;
       font-size: 13px;
-      color: #555;
+      color: #444;
     }
 
     @media (max-width: 600px) {
@@ -141,7 +155,6 @@
 <body>
 
   <div class="container">
-    <!-- Logo Area -->
     <div class="logo-area">
       <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
       <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
@@ -149,36 +162,38 @@
 
     <h2>Drawing Loco Platform UGL</h2>
 
-    <!-- Search Bar -->
     <div class="search-bar">
       <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)" />
       <button onclick="cari()">Cari</button>
     </div>
 
-    <!-- Hasil pencarian -->
     <div id="hasil"></div>
-
-    <!-- Export ke Excel -->
-    <div class="export-button" id="export-btn">
+    <div id="loading-status">⏳ Memuat data...</div>
+    <div class="export-area" id="export-area">
+      <div>✅ Siap digunakan</div>
       <button onclick="exportToExcel()">📥 Export ke Excel</button>
     </div>
   </div>
 
-  <!-- Footer -->
-  <div class="footer">© 2025 Abdany Afiq Khoiri</div>
+  <div class="copyright">
+    © Abdany Afiq Khoiri
+  </div>
 
   <script>
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
     let semuaData = [];
 
+    const loadingStatus = document.getElementById("loading-status");
+    const exportArea = document.getElementById("export-area");
+
     fetch(url)
       .then(res => res.json())
       .then(json => {
         semuaData = json;
-        console.log("✅ Data berhasil dimuat:", semuaData.length, "file");
+        loadingStatus.innerHTML = "✅ Siap digunakan";
       })
       .catch(err => {
-        alert("❌ Gagal memuat data.");
+        loadingStatus.innerHTML = "⚠️ Gagal mengambil data";
         console.error(err);
       });
 
@@ -190,55 +205,52 @@
         item.name.toLowerCase().includes(keyword)
       );
 
+      const hasilEl = document.getElementById("hasil");
+
       if (hasil.length === 0) {
-        document.getElementById("hasil").innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
-        document.getElementById("export-btn").style.display = "none";
-        return;
+        hasilEl.innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
+        exportArea.style.display = "none";
+      } else {
+        const fileTerakhir = {};
+        hasil.forEach(file => {
+          const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
+          const revStr = String(file.revisi).trim();
+          let revCompare = /^\d+$/.test(revStr) ? parseInt(revStr) : revStr.toUpperCase().charCodeAt(0);
+
+          if (!fileTerakhir[key] || revCompare > fileTerakhir[key].revCompare) {
+            fileTerakhir[key] = { ...file, revCompare };
+          }
+        });
+
+        let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr>";
+        Object.values(fileTerakhir).forEach(file => {
+          html += `
+            <tr>
+              <td>${file.name}</td>
+              <td>${file.revisi}</td>
+              <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
+            </tr>`;
+        });
+        html += "</table>";
+
+        hasilEl.innerHTML = html;
+        exportArea.style.display = "block";
+        loadingStatus.style.display = "none"; // hide after search
       }
-
-      const fileTerakhir = {};
-      hasil.forEach(file => {
-        const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
-        const revStr = String(file.revisi).trim();
-        let revCompare = 0;
-
-        if (/^\d+$/.test(revStr)) {
-          revCompare = parseInt(revStr);
-        } else if (/^[A-Z]$/i.test(revStr)) {
-          revCompare = revStr.toUpperCase().charCodeAt(0);
-        }
-
-        if (!fileTerakhir[key] || revCompare > fileTerakhir[key].revCompare) {
-          fileTerakhir[key] = { ...file, revCompare };
-        }
-      });
-
-      let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr>";
-      Object.values(fileTerakhir).forEach(file => {
-        html += `
-          <tr>
-            <td>${file.name}</td>
-            <td>${file.revisi}</td>
-            <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
-          </tr>`;
-      });
-      html += "</table>";
-
-      document.getElementById("hasil").innerHTML = html;
-      document.getElementById("export-btn").style.display = "block";
     }
 
     function exportToExcel() {
-      let table = document.querySelector("#hasil table");
+      const table = document.querySelector("#hasil table");
       if (!table) return;
 
-      let html = table.outerHTML;
-      let url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
-      let a = document.createElement('a');
+      const html = table.outerHTML;
+      const url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+      const a = document.createElement('a');
       a.href = url;
       a.download = 'hasil_pencarian.xls';
       a.click();
     }
   </script>
+
 </body>
 </html>
