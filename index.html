@@ -2,12 +2,10 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Web Drawing Loco Platform UGL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Drawing Loco Platform UGL</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html, body {
       margin: 0;
@@ -20,16 +18,14 @@
     body::before {
       content: "";
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-image: url('https://media.licdn.com/dms/image/v2/C5605AQF-8cSaDlhrtQ/feedshare-thumbnail_720_1280/feedshare-thumbnail_720_1280/0/1659938691153?e=2147483647&v=beta&t=1oR4qJCLb-iSWTnF3sLHhETQQ9b0pPAPb3Op8cLfY0Q');
-      background-size: cover;
-      background-position: center;
+      inset: 0;
+      background: url('https://media.licdn.com/dms/image/v2/C5605AQF-8cSaDlhrtQ/feedshare-thumbnail_720_1280/feedshare-thumbnail_720_1280/0/1659938691153?e=2147483647&v=beta&t=1oR4qJCLb-iSWTnF3sLHhETQQ9b0pPAPb3Op8cLfY0Q') no-repeat center center / cover;
       filter: blur(10px);
       z-index: -1;
     }
 
     .container {
-      background-color: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.92);
       max-width: 900px;
       margin: 60px auto;
       padding: 30px;
@@ -46,7 +42,7 @@
     }
 
     .logo-area img {
-      max-height: 60px;
+      max-height: 40px;
       height: auto;
     }
 
@@ -97,53 +93,42 @@
       text-align: left;
     }
 
-    th {
-      background-color: #f3f3f3;
-    }
+    th { background-color: #f3f3f3; }
 
     a {
       color: #007bff;
       text-decoration: none;
     }
 
-    a:hover {
-      text-decoration: underline;
-    }
+    a:hover { text-decoration: underline; }
 
-    #hasil {
-      margin-bottom: 20px;
-    }
+    #hasil { margin-bottom: 30px; }
 
-    #loading-status {
-      text-align: center;
-      font-weight: bold;
-      margin: 20px 0;
-      min-height: 24px;
-    }
-
-    #export-btn {
+    .export-button {
       display: none;
-      margin: 0 auto 40px;
-      padding: 10px 20px;
-      font-size: 15px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .export-button button {
       background-color: #28a745;
       color: white;
+      font-size: 16px;
       border: none;
       border-radius: 6px;
+      padding: 10px 20px;
       cursor: pointer;
     }
 
-    @keyframes dots {
-      0% { content: ""; }
-      25% { content: "."; }
-      50% { content: ".."; }
-      75% { content: "..."; }
-      100% { content: ""; }
+    .export-button button:hover {
+      background-color: #218838;
     }
 
-    .loading-text::after {
-      content: "";
-      animation: dots 1.2s infinite;
+    .footer {
+      text-align: center;
+      padding-bottom: 20px;
+      font-size: 13px;
+      color: #555;
     }
 
     @media (max-width: 600px) {
@@ -151,18 +136,12 @@
         max-height: 40px;
       }
     }
-
-    footer {
-      text-align: center;
-      padding: 20px 0;
-      color: #555;
-      font-size: 14px;
-    }
   </style>
 </head>
 <body>
 
   <div class="container">
+    <!-- Logo Area -->
     <div class="logo-area">
       <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
       <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
@@ -170,51 +149,36 @@
 
     <h2>Drawing Loco Platform UGL</h2>
 
+    <!-- Search Bar -->
     <div class="search-bar">
       <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)" />
       <button onclick="cari()">Cari</button>
     </div>
 
+    <!-- Hasil pencarian -->
     <div id="hasil"></div>
-    <div id="loading-status"></div>
-    <button id="export-btn" onclick="exportExcel()">📤 Export ke Excel</button>
+
+    <!-- Export ke Excel -->
+    <div class="export-button" id="export-btn">
+      <button onclick="exportToExcel()">📥 Export ke Excel</button>
+    </div>
   </div>
 
-  <footer>
-    &copy; 2025 Abdany Afiq Khoiri. All rights reserved.
-  </footer>
+  <!-- Footer -->
+  <div class="footer">© 2025 Abdany Afiq Khoiri</div>
 
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script>
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
     let semuaData = [];
-    let hasilTabel = [];
-
-    function setLoadingStatus(status, isLoading = false, showExport = false) {
-      const el = document.getElementById("loading-status");
-      const btn = document.getElementById("export-btn");
-      el.textContent = status;
-
-      if (isLoading) {
-        el.classList.add("loading-text");
-        btn.style.display = "none";
-      } else {
-        el.classList.remove("loading-text");
-        btn.style.display = showExport ? "block" : "none";
-      }
-    }
-
-    setLoadingStatus("Memuat data", true);
 
     fetch(url)
       .then(res => res.json())
       .then(json => {
         semuaData = json;
-        setLoadingStatus("✅ Siap digunakan", false);
         console.log("✅ Data berhasil dimuat:", semuaData.length, "file");
       })
       .catch(err => {
-        setLoadingStatus("⚠️ Gagal mengambil data", false);
+        alert("❌ Gagal memuat data.");
         console.error(err);
       });
 
@@ -222,16 +186,13 @@
       const keyword = document.getElementById("keyword").value.trim().toLowerCase();
       if (!keyword) return;
 
-      document.getElementById("hasil").innerHTML = "";
-      setLoadingStatus("Sedang mencari", true);
-
       const hasil = semuaData.filter(item =>
         item.name.toLowerCase().includes(keyword)
       );
 
       if (hasil.length === 0) {
         document.getElementById("hasil").innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
-        setLoadingStatus("✅ Siap digunakan", false);
+        document.getElementById("export-btn").style.display = "none";
         return;
       }
 
@@ -252,10 +213,8 @@
         }
       });
 
-      hasilTabel = Object.values(fileTerakhir);
-
       let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr>";
-      hasilTabel.forEach(file => {
+      Object.values(fileTerakhir).forEach(file => {
         html += `
           <tr>
             <td>${file.name}</td>
@@ -266,27 +225,20 @@
       html += "</table>";
 
       document.getElementById("hasil").innerHTML = html;
-      setLoadingStatus("✅ Siap digunakan", false, true);
+      document.getElementById("export-btn").style.display = "block";
     }
 
-    function exportExcel() {
-      if (hasilTabel.length === 0) {
-        alert("Tidak ada data untuk diekspor.");
-        return;
-      }
+    function exportToExcel() {
+      let table = document.querySelector("#hasil table");
+      if (!table) return;
 
-      const wsData = hasilTabel.map(file => ({
-        "Nama File": file.name,
-        "REV": file.revisi,
-        "Link PDF": file.url
-      }));
-
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.json_to_sheet(wsData);
-      XLSX.utils.book_append_sheet(wb, ws, "Data Revisi");
-      XLSX.writeFile(wb, "Revisi_Terakhir_Drawing.xlsx");
+      let html = table.outerHTML;
+      let url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+      let a = document.createElement('a');
+      a.href = url;
+      a.download = 'hasil_pencarian.xls';
+      a.click();
     }
   </script>
-
 </body>
 </html>
