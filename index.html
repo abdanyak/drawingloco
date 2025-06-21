@@ -244,7 +244,7 @@
         }
       });
 
-      let html = "<div class='table-wrapper'><table><thead><tr><th><input type='checkbox' onclick='toggleAll(this)'> ✅</th><th>Nama File</th><th>REV</th><th>Link PDF</th></tr></thead><tbody>";
+      let html = "<div class='table-wrapper'><table><thead><tr><th><input type='checkbox' onclick='toggleAll(this)'> All</th><th>Nama File</th><th>REV</th><th>Link PDF</th></tr></thead><tbody>";
       Object.values(fileTerakhir).forEach(file => {
         const fileKey = `${file.name}|${file.revisi}|${file.url}`;
         const isChecked = selectedFiles.has(fileKey) ? "checked" : "";
