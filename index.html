@@ -28,31 +28,36 @@
       z-index: -1;
     }
 
+    .logo-left {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .logo-right {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+    }
+
+    .logo-left img {
+      max-height: 40px;
+    }
+
+    .logo-right img {
+      max-height: 50px;
+    }
+
     .container {
       background-color: rgba(255, 255, 255, 0.92);
       max-width: 900px;
-      margin: 60px auto;
+      margin: 100px auto 60px;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    }
-
-    .logo-area {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .logo-area img {
-      max-height: 40px;
-      height: auto;
-    }
-
-    .logo-area img[alt="Logo INKA"] {
-      max-height: 50px;
     }
 
     h2 {
@@ -126,18 +131,6 @@
       min-height: 24px;
     }
 
-    @keyframes loadingDots {
-      0% { content: "."; }
-      33% { content: ".."; }
-      66% { content: "..."; }
-      100% { content: "."; }
-    }
-
-    #loading-status.loading::after {
-      content: "...";
-      animation: loadingDots 1.2s infinite;
-    }
-
     .export-area {
       text-align: center;
       margin-top: 10px;
@@ -165,23 +158,22 @@
       color: white;
       background: none;
     }
-
-    @media (max-width: 600px) {
-      .logo-area img {
-        max-height: 32px;
-      }
-    }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <div class="logo-area">
-      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
-      <img src="https://wp.logos-download.com/wp-content/uploads/2016/07/CIMIC_logo.png?dl" alt="Logo CIMIC">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
-    </div>
+  <!-- LOGO POJOK KIRI -->
+  <div class="logo-left">
+    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
+    <img src="https://wp.logos-download.com/wp-content/uploads/2016/07/CIMIC_logo.png?dl" alt="Logo CIMIC">
+  </div>
 
+  <!-- LOGO POJOK KANAN -->
+  <div class="logo-right">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
+  </div>
+
+  <div class="container">
     <h2>Drawing Loco Platform UGL</h2>
 
     <div class="search-bar">
@@ -277,6 +269,5 @@
       a.click();
     }
   </script>
-
 </body>
 </html>
