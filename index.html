@@ -21,7 +21,7 @@
       content: "";
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background-image: url('image.jpg'); /* Gambar lokal di repo */
+      background-image: url('image.jpg');
       background-size: cover;
       background-position: center;
       filter: blur(2px);
@@ -49,6 +49,10 @@
     .logo-area img {
       max-height: 40px;
       height: auto;
+    }
+
+    .logo-area img[alt="Logo INKA"] {
+      max-height: 42px;
     }
 
     h2 {
@@ -257,7 +261,7 @@
         exportArea.style.display = "block";
       }
 
-      // Sembunyikan status loading siap digunakan setelah pencarian
+      // Sembunyikan status siap digunakan setelah pencarian
       loadingStatus.style.display = "none";
     }
 
