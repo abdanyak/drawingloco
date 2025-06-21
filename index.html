@@ -28,39 +28,32 @@
       z-index: -1;
     }
 
-    /* NAVBAR HEADER */
-    .navbar {
+    header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background-color: rgba(255, 255, 255, 0.92);
       padding: 10px 20px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background-color: rgba(255, 255, 255, 0.5);
-      backdrop-filter: blur(4px);
-      z-index: 10;
     }
 
-    .navbar-left, .navbar-right {
+    .logo-left, .logo-right {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .navbar-left img {
+    .logo-left img {
       height: 20px;
     }
 
-    .navbar-right img {
+    .logo-right img {
       height: 30px;
     }
 
     .container {
       background-color: rgba(255, 255, 255, 0.92);
       max-width: 900px;
-      margin: 100px auto 60px;
+      margin: 40px auto;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
@@ -100,11 +93,16 @@
       cursor: pointer;
     }
 
+    .table-wrapper {
+      overflow-x: auto;
+      width: 100%;
+      margin-top: 20px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
-      margin-top: 20px;
     }
 
     th, td {
@@ -126,10 +124,6 @@
       text-decoration: underline;
     }
 
-    #hasil {
-      margin-bottom: 20px;
-    }
-
     #loading-status {
       text-align: center;
       font-weight: bold;
@@ -137,9 +131,21 @@
       min-height: 24px;
     }
 
+    #loading-status.loading::after {
+      content: "...";
+      animation: loadingDots 1.2s infinite;
+    }
+
+    @keyframes loadingDots {
+      0% { content: "."; }
+      33% { content: ".."; }
+      66% { content: "..."; }
+      100% { content: "."; }
+    }
+
     .export-area {
       text-align: center;
-      margin-top: 10px;
+      margin-top: 20px;
       display: none;
     }
 
@@ -151,7 +157,6 @@
       padding: 10px 20px;
       border-radius: 8px;
       cursor: pointer;
-      margin-top: 8px;
     }
 
     .copyright {
@@ -162,24 +167,36 @@
       right: 0;
       font-size: 13px;
       color: white;
-      background: none;
+      background-color: rgba(255, 255, 255, 0.92);
+    }
+
+    @media (max-width: 600px) {
+      .logo-left img {
+        height: 18px;
+      }
+
+      .logo-right img {
+        height: 24px;
+      }
+
+      table, thead, tbody, th, td, tr {
+        font-size: 12px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- NAVBAR HEADER -->
-  <div class="navbar">
-    <div class="navbar-left">
+  <header>
+    <div class="logo-left">
       <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
       <img src="https://wp.logos-download.com/wp-content/uploads/2016/07/CIMIC_logo.png?dl" alt="Logo CIMIC">
     </div>
-    <div class="navbar-right">
+    <div class="logo-right">
       <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
     </div>
-  </div>
+  </header>
 
-  <!-- KONTEN UTAMA -->
   <div class="container">
     <h2>Drawing Loco Platform UGL</h2>
 
@@ -188,9 +205,8 @@
       <button onclick="cari()">Cari</button>
     </div>
 
-    <div id="hasil"></div>
     <div id="loading-status" class="loading">⏳ Memuat data</div>
-
+    <div id="hasil"></div>
     <div class="export-area" id="export-area">
       <button onclick="exportToExcel()">📥 Export ke Excel</button>
     </div>
@@ -245,7 +261,7 @@
           }
         });
 
-        let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr>";
+        let html = "<table><thead><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr></thead><tbody>";
         Object.values(fileTerakhir).forEach(file => {
           html += `
             <tr>
@@ -254,9 +270,9 @@
               <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
             </tr>`;
         });
-        html += "</table>";
+        html += "</tbody></table>";
 
-        hasilEl.innerHTML = html;
+        hasilEl.innerHTML = `<div class="table-wrapper">${html}</div>`;
         exportArea.style.display = "block";
       }
 
@@ -275,5 +291,6 @@
       a.click();
     }
   </script>
+
 </body>
 </html>
