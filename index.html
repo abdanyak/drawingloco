@@ -102,31 +102,67 @@
     #hasil {
       margin-bottom: 40px;
     }
+
+    #loading-status {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 20px;
+      min-height: 24px;
+    }
+
+    @keyframes dots {
+      0% { content: ""; }
+      25% { content: "."; }
+      50% { content: ".."; }
+      75% { content: "..."; }
+      100% { content: ""; }
+    }
+
+    .loading-text::after {
+      content: "";
+      animation: dots 1.2s infinite;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h2>🔍 Cari File PDF - Revisi Terakhir</h2>
+
     <div class="search-bar">
       <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)" />
       <button onclick="cari()">Cari</button>
     </div>
+
     <div id="hasil"></div>
+    <div id="loading-status"></div>
   </div>
 
   <script>
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
     let semuaData = [];
 
+    function setLoadingStatus(status, isLoading = false) {
+      const el = document.getElementById("loading-status");
+      el.textContent = status;
+      if (isLoading) {
+        el.classList.add("loading-text");
+      } else {
+        el.classList.remove("loading-text");
+      }
+    }
+
+    setLoadingStatus("Memuat data", true);
+
     fetch(url)
       .then(res => res.json())
       .then(json => {
         semuaData = json;
+        setLoadingStatus("✅ Siap digunakan", false);
         console.log("✅ Data berhasil dimuat:", semuaData.length, "file");
       })
       .catch(err => {
-        document.getElementById("hasil").innerHTML = "⚠️ Gagal mengambil data.";
+        setLoadingStatus("⚠️ Gagal mengambil data", false);
         console.error(err);
       });
 
@@ -134,12 +170,16 @@
       const keyword = document.getElementById("keyword").value.trim().toLowerCase();
       if (!keyword) return;
 
+      document.getElementById("hasil").innerHTML = "";
+      setLoadingStatus("Sedang mencari", true);
+
       const hasil = semuaData.filter(item =>
         item.name.toLowerCase().includes(keyword)
       );
 
       if (hasil.length === 0) {
         document.getElementById("hasil").innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
+        setLoadingStatus("✅ Pencarian selesai", false);
         return;
       }
 
@@ -172,6 +212,7 @@
       html += "</table>";
 
       document.getElementById("hasil").innerHTML = html;
+      setLoadingStatus("✅ Pencarian selesai", false);
     }
   </script>
 
