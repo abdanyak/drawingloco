@@ -4,11 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Web Drawing Loco Platform UGL</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     html, body {
       margin: 0;
       padding: 0;
@@ -16,7 +14,6 @@
       min-height: 100vh;
       position: relative;
     }
-
     body::before {
       content: "";
       position: fixed;
@@ -35,13 +32,11 @@
       background-color: rgba(255, 255, 255, 0.92);
       padding: 10px 20px;
     }
-
     .logo-left, .logo-right {
       display: flex;
       align-items: center;
       gap: 10px;
     }
-
     .logo-left img { height: 20px; }
     .logo-right img { height: 30px; }
 
@@ -54,10 +49,7 @@
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
     }
 
-    h2 {
-      text-align: center;
-      margin-bottom: 25px;
-    }
+    h2 { text-align: center; margin-bottom: 25px; }
 
     .search-bar {
       display: flex;
@@ -119,34 +111,6 @@
       word-wrap: break-word;
     }
 
-    a {
-      color: #007bff;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    #loading-status {
-      text-align: center;
-      font-weight: bold;
-      margin-top: 20px;
-      min-height: 24px;
-    }
-
-    #loading-status.loading::after {
-      content: "...";
-      animation: loadingDots 1.2s infinite;
-    }
-
-    @keyframes loadingDots {
-      0% { content: "."; }
-      33% { content: ".."; }
-      66% { content: "..."; }
-      100% { content: "."; }
-    }
-
     .export-area {
       text-align: center;
       margin-top: 20px;
@@ -165,21 +129,15 @@
 
     .copyright {
       text-align: center;
+      margin: 20px 0;
       font-size: 13px;
       color: white;
-      background: none;
-      margin-top: 40px;
-      padding-bottom: 16px;
     }
 
     @media (max-width: 600px) {
       .logo-left img { height: 18px; }
       .logo-right img { height: 24px; }
-
-      table, thead, tbody, th, td, tr {
-        font-size: 12px;
-      }
-
+      table, thead, tbody, th, td, tr { font-size: 12px; }
       td:first-child {
         max-width: 100%;
         word-break: break-word;
@@ -212,7 +170,7 @@
     <div id="hasil"></div>
 
     <div class="export-area" id="export-area">
-      <button onclick="exportToExcel()">📥 Export ke Excel</button>
+      <button onclick="exportToExcel()">📥 Export File Terpilih (.xlsx)</button>
     </div>
   </div>
 
@@ -220,13 +178,12 @@
     © Abdany Afiq Khoiri
   </div>
 
-  <!-- SheetJS untuk export .xlsx -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
   <script>
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
     let semuaData = [];
+    const selectedFiles = new Map();
 
+    const hasilEl = document.getElementById("hasil");
     const loadingStatus = document.getElementById("loading-status");
     const exportArea = document.getElementById("export-area");
 
@@ -251,49 +208,68 @@
         item.name.toLowerCase().includes(keyword)
       );
 
-      const hasilEl = document.getElementById("hasil");
-
       if (hasil.length === 0) {
         hasilEl.innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
         exportArea.style.display = "none";
-      } else {
-        const fileTerakhir = {};
-        hasil.forEach(file => {
-          const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
-          const revStr = String(file.revisi).trim();
-          let revCompare = /^\d+$/.test(revStr) ? parseInt(revStr) : revStr.toUpperCase().charCodeAt(0);
-
-          if (!fileTerakhir[key] || revCompare > fileTerakhir[key].revCompare) {
-            fileTerakhir[key] = { ...file, revCompare };
-          }
-        });
-
-        let html = "<div class='table-wrapper'><table id='data-table'><thead><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr></thead><tbody>";
-        Object.values(fileTerakhir).forEach(file => {
-          html += `
-            <tr>
-              <td>${file.name}</td>
-              <td>${file.revisi}</td>
-              <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
-            </tr>`;
-        });
-        html += "</tbody></table></div>";
-
-        hasilEl.innerHTML = html;
-        exportArea.style.display = "block";
+        return;
       }
 
+      const fileTerakhir = {};
+      hasil.forEach(file => {
+        const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
+        const revStr = String(file.revisi).trim();
+        let revCompare = /^\d+$/.test(revStr) ? parseInt(revStr) : revStr.toUpperCase().charCodeAt(0);
+
+        if (!fileTerakhir[key] || revCompare > fileTerakhir[key].revCompare) {
+          fileTerakhir[key] = { ...file, revCompare };
+        }
+      });
+
+      let html = "<div class='table-wrapper'><table><thead><tr><th>Pilih</th><th>Nama File</th><th>REV</th><th>Link PDF</th></tr></thead><tbody>";
+      Object.values(fileTerakhir).forEach(file => {
+        const fileKey = `${file.name}|${file.revisi}|${file.url}`;
+        const isChecked = selectedFiles.has(fileKey) ? "checked" : "";
+        html += `
+          <tr>
+            <td><input type="checkbox" onchange="toggleSelection(this)" data-key="${fileKey}" ${isChecked}></td>
+            <td>${file.name}</td>
+            <td>${file.revisi}</td>
+            <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
+          </tr>`;
+      });
+      html += "</tbody></table></div>";
+
+      hasilEl.innerHTML = html;
+      exportArea.style.display = "block";
       loadingStatus.style.display = "none";
     }
 
-    function exportToExcel() {
-      const table = document.getElementById("data-table");
-      if (!table) return;
+    function toggleSelection(checkbox) {
+      const key = checkbox.getAttribute("data-key");
+      if (checkbox.checked) {
+        const [name, revisi, url] = key.split("|");
+        selectedFiles.set(key, { name, revisi, url });
+      } else {
+        selectedFiles.delete(key);
+      }
+    }
 
-      const wb = XLSX.utils.table_to_book(table, { sheet: "Hasil Pencarian" });
-      XLSX.writeFile(wb, "hasil_pencarian.xlsx");
+    function exportToExcel() {
+      if (selectedFiles.size === 0) {
+        alert("❗ Pilih minimal satu file terlebih dahulu.");
+        return;
+      }
+
+      const data = [["Nama File", "REV", "Link PDF"]];
+      selectedFiles.forEach(file => {
+        data.push([file.name, file.revisi, file.url]);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Files Terpilih");
+      XLSX.writeFile(wb, "file_terpilih.xlsx");
     }
   </script>
-
 </body>
 </html>
