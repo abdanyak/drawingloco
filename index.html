@@ -7,17 +7,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      padding: 0;
+    body {
+      margin: 0; padding: 0;
       font-family: 'Segoe UI', sans-serif;
       min-height: 100vh;
       position: relative;
     }
     body::before {
       content: "";
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background-image: url('image.jpg');
       background-size: cover;
       background-position: center;
@@ -25,21 +23,14 @@
       z-index: -1;
     }
     header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: rgba(255, 255, 255, 0.92);
+      display: flex; justify-content: space-between; align-items: center;
+      background-color: rgba(255,255,255,0.92);
       padding: 10px 20px;
-    }
-    .logo-left, .logo-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
     .logo-left img { height: 20px; }
     .logo-right img { height: 30px; }
     .container {
-      background-color: rgba(255, 255, 255, 0.92);
+      background-color: rgba(255,255,255,0.92);
       max-width: 900px;
       margin: 40px auto;
       padding: 30px;
@@ -48,10 +39,7 @@
     }
     h2 { text-align: center; margin-bottom: 25px; }
     .search-bar {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
       margin-bottom: 20px;
     }
     .search-bar input {
@@ -77,17 +65,14 @@
       overflow-x: auto;
       margin-top: 20px;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: left;
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
     th { background-color: #f3f3f3; }
+    .file-name {
+      word-break: break-word;
+      white-space: normal;
+      max-width: 200px;
+    }
     .export-area {
       text-align: center;
       margin-top: 20px;
@@ -102,33 +87,21 @@
       border-radius: 8px;
       cursor: pointer;
     }
-    .copyright {
-      text-align: center;
-      margin: 20px 0;
-      font-size: 13px;
-      color: white;
-    }
-    #loading-status {
-      text-align: center;
-      font-weight: bold;
-      margin-top: 20px;
-      font-size: 16px;
-    }
-    .dot-animate::after {
-      content: '...';
-      animation: dotFlash 1.5s steps(4, end) infinite;
-    }
+    .copyright { text-align: center; margin: 20px 0; font-size: 13px; color: white; }
+    #loading-status { text-align: center; font-weight: bold; margin-top: 20px; font-size: 16px; }
+    .dot-animate::after { content: '...'; animation: dotFlash 1.5s steps(4, end) infinite; }
     @keyframes dotFlash {
-      0%   { content: ''; }
-      25%  { content: '.'; }
-      50%  { content: '..'; }
-      75%  { content: '...'; }
+      0% { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75% { content: '...'; }
       100% { content: ''; }
     }
     @media (max-width: 600px) {
       .logo-left img { height: 18px; }
       .logo-right img { height: 24px; }
       table, th, td { font-size: 12px; }
+      .file-name { max-width: 90px; }
     }
   </style>
 </head>
@@ -142,35 +115,31 @@
       <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
     </div>
   </header>
-
   <div class="container">
     <h2>Drawing Loco Platform UGL</h2>
     <div class="search-bar">
       <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)">
       <button onclick="cari()">Cari</button>
     </div>
-
     <div id="loading-status" class="dot-animate">⏳ Memuat data</div>
     <div id="file-terpilih"></div>
     <div id="hasil"></div>
-
     <div class="export-area" id="export-area">
       <button onclick="exportToExcel()">📥 Export File Terpilih (.xlsx)</button>
     </div>
   </div>
-
   <div class="copyright">© Abdany Afiq Khoiri</div>
-
   <script>
+    // Data & Elements
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
     let semuaData = [];
     const selectedFiles = new Map();
-
     const hasilEl = document.getElementById("hasil");
     const fileTerpilihEl = document.getElementById("file-terpilih");
     const loadingStatus = document.getElementById("loading-status");
     const exportArea = document.getElementById("export-area");
 
+    // Fetch Data
     fetch(url)
       .then(res => res.json())
       .then(json => {
@@ -183,16 +152,17 @@
         console.error(err);
       });
 
+    // Update List Selected
     function updateSelectedList() {
       if (selectedFiles.size === 0) {
         fileTerpilihEl.innerHTML = "";
         return;
       }
       let html = `<div class='table-wrapper'><h3>📌 File Terpilih</h3>
-      <table><thead><tr><th>Nama File</th><th>REV</th><th>Link</th><th>Hapus</th></tr></thead><tbody>`;
+      <table><thead><tr><th class="file-name">Nama File</th><th>REV</th><th>Link</th><th>Hapus</th></tr></thead><tbody>`;
       selectedFiles.forEach((file, key) => {
         html += `<tr>
-          <td>${file.name}</td>
+          <td class="file-name">${file.name}</td>
           <td>${file.revisi}</td>
           <td><a href="${file.url}" target="_blank">📄 Lihat</a></td>
           <td><button onclick="hapusDipilih('${key}')">❌</button></td>
@@ -202,12 +172,14 @@
       fileTerpilihEl.innerHTML = html;
     }
 
+    // Hapus Dipilih
     function hapusDipilih(key) {
       selectedFiles.delete(key);
       updateSelectedList();
       cari(); // refresh checkbox
     }
 
+    // Toggle Selection
     function toggleSelection(checkbox) {
       const key = checkbox.getAttribute("data-key");
       const [name, revisi, url] = key.split("|");
@@ -219,6 +191,7 @@
       updateSelectedList();
     }
 
+    // Toggle All
     function toggleAll(source) {
       const checkboxes = document.querySelectorAll("input[type='checkbox'].item-check");
       checkboxes.forEach(cb => {
@@ -227,14 +200,13 @@
       });
     }
 
+    // Cari
     function cari() {
       const keyword = document.getElementById("keyword").value.trim().toLowerCase();
       if (!keyword) return;
-
       const hasil = semuaData.filter(item =>
         item.name.toLowerCase().includes(keyword)
       );
-
       const fileTerakhir = {};
       hasil.forEach(file => {
         const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
@@ -244,26 +216,31 @@
           fileTerakhir[key] = { ...file, revCompare };
         }
       });
-
-      let html = "<div class='table-wrapper'><table><thead><tr><th><input type='checkbox' onclick='toggleAll(this)'> All</th><th>Nama File</th><th>REV</th><th>Link PDF</th></tr></thead><tbody>";
+      let html = `<div class='table-wrapper'><table>
+        <thead><tr>
+          <th><input type='checkbox' onclick='toggleAll(this)'> All</th>
+          <th class="file-name">Nama File</th>
+          <th>REV</th>
+          <th>Link PDF</th>
+        </tr></thead><tbody>`;
       Object.values(fileTerakhir).forEach(file => {
         const fileKey = `${file.name}|${file.revisi}|${file.url}`;
         const isChecked = selectedFiles.has(fileKey) ? "checked" : "";
         html += `<tr>
           <td><input type='checkbox' class='item-check' data-key="${fileKey}" onchange="toggleSelection(this)" ${isChecked}></td>
-          <td>${file.name}</td>
+          <td class="file-name">${file.name}</td>
           <td>${file.revisi}</td>
           <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
         </tr>`;
       });
       html += "</tbody></table></div>";
-
       hasilEl.innerHTML = html;
       exportArea.style.display = "block";
       loadingStatus.style.display = "none";
       updateSelectedList();
     }
 
+    // Export
     function exportToExcel() {
       if (selectedFiles.size === 0) {
         alert("❗ Pilih minimal satu file terlebih dahulu.");
