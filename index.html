@@ -10,16 +10,11 @@
     }
 
     html, body {
-      height: 100%;
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', sans-serif;
-    }
-
-    body {
-      display: flex;
-      flex-direction: column;
-      background-color: #f4f4f4;
+      min-height: 100vh;
+      position: relative;
     }
 
     body::before {
@@ -33,42 +28,35 @@
       z-index: -1;
     }
 
-    .page-wrapper {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
     header {
-      background-color: rgba(255,255,255,0.92);
-      padding: 10px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      background-color: rgba(255, 255, 255, 0.92);
+      padding: 10px 20px;
     }
 
-    .logo-group {
+    .logo-left, .logo-right {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .logo-group img {
+    .logo-left img {
       height: 20px;
     }
 
-    .logo-inka {
+    .logo-right img {
       height: 30px;
     }
 
     .container {
-      background-color: rgba(255,255,255,0.92);
+      background-color: rgba(255, 255, 255, 0.92);
       max-width: 900px;
       margin: 40px auto;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
-      flex: 1;
     }
 
     h2 {
@@ -105,11 +93,17 @@
       cursor: pointer;
     }
 
+    .table-wrapper {
+      overflow-x: auto;
+      width: 100%;
+      margin-top: 20px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
-      margin-top: 20px;
+      table-layout: auto;
       word-break: break-word;
     }
 
@@ -124,6 +118,12 @@
       background-color: #f3f3f3;
     }
 
+    td:first-child {
+      max-width: 300px;
+      white-space: normal;
+      word-wrap: break-word;
+    }
+
     a {
       color: #007bff;
       text-decoration: none;
@@ -133,15 +133,16 @@
       text-decoration: underline;
     }
 
-    #hasil {
-      margin-bottom: 20px;
-    }
-
     #loading-status {
       text-align: center;
       font-weight: bold;
       margin-top: 20px;
       min-height: 24px;
+    }
+
+    #loading-status.loading::after {
+      content: "...";
+      animation: loadingDots 1.2s infinite;
     }
 
     @keyframes loadingDots {
@@ -151,14 +152,9 @@
       100% { content: "."; }
     }
 
-    #loading-status.loading::after {
-      content: "...";
-      animation: loadingDots 1.2s infinite;
-    }
-
     .export-area {
       text-align: center;
-      margin-top: 10px;
+      margin-top: 20px;
       display: none;
     }
 
@@ -170,61 +166,69 @@
       padding: 10px 20px;
       border-radius: 8px;
       cursor: pointer;
-      margin-top: 8px;
     }
 
     .copyright {
       text-align: center;
+      position: fixed;
+      bottom: 8px;
+      left: 0;
+      right: 0;
       font-size: 13px;
       color: white;
       background: none;
-      padding: 16px 0;
     }
 
     @media (max-width: 600px) {
-      .logo-group img {
-        height: 16px;
+      .logo-left img {
+        height: 18px;
       }
 
-      .logo-inka {
+      .logo-right img {
         height: 24px;
       }
 
-      table, th, td {
+      table, thead, tbody, th, td, tr {
         font-size: 12px;
+      }
+
+      td:first-child {
+        max-width: 100%;
+        word-break: break-word;
+        white-space: normal;
       }
     }
   </style>
 </head>
 <body>
-  <div class="page-wrapper">
 
-    <header>
-      <div class="logo-group">
-        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="UGL">
-        <img src="https://wp.logos-download.com/wp-content/uploads/2016/07/CIMIC_logo.png?dl" alt="CIMIC">
-      </div>
-      <img class="logo-inka" src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="INKA">
-    </header>
+  <header>
+    <div class="logo-left">
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/b/b1/UGL_Limited_logo.svg/1280px-UGL_Limited_logo.svg.png" alt="Logo UGL">
+      <img src="https://wp.logos-download.com/wp-content/uploads/2016/07/CIMIC_logo.png?dl" alt="Logo CIMIC">
+    </div>
+    <div class="logo-right">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
+    </div>
+  </header>
 
-    <div class="container">
-      <h2>Drawing Loco Platform UGL</h2>
+  <div class="container">
+    <h2>Drawing Loco Platform UGL</h2>
 
-      <div class="search-bar">
-        <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)" />
-        <button onclick="cari()">Cari</button>
-      </div>
-
-      <div id="hasil"></div>
-      <div id="loading-status" class="loading">⏳ Memuat data</div>
-
-      <div class="export-area" id="export-area">
-        <button onclick="exportToExcel()">📥 Export ke Excel</button>
-      </div>
+    <div class="search-bar">
+      <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)" />
+      <button onclick="cari()">Cari</button>
     </div>
 
-    <div class="copyright">© Abdany Afiq Khoiri</div>
+    <div id="loading-status" class="loading">⏳ Memuat data</div>
+    <div id="hasil"></div>
+    <div class="export-area" id="export-area">
+      <button onclick="exportToExcel()">📥 Export ke Excel</button>
+    </div>
+  </div>
 
+  <div class="copyright">
+    © Abdany Afiq Khoiri
   </div>
 
   <script>
@@ -272,16 +276,16 @@
           }
         });
 
-        let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr>";
+        let html = "<div class='table-wrapper'><table><thead><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr></thead><tbody>";
         Object.values(fileTerakhir).forEach(file => {
           html += `
             <tr>
-              <td style="word-break: break-word;">${file.name}</td>
+              <td>${file.name}</td>
               <td>${file.revisi}</td>
               <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
             </tr>`;
         });
-        html += "</table>";
+        html += "</tbody></table></div>";
 
         hasilEl.innerHTML = html;
         exportArea.style.display = "block";
@@ -302,5 +306,6 @@
       a.click();
     }
   </script>
+
 </body>
 </html>
