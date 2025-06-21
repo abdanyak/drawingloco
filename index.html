@@ -2,10 +2,12 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Web Drawing Loco Platform UGL</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Drawing Loco Platform UGL</title>
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     html, body {
       margin: 0;
@@ -13,6 +15,7 @@
       font-family: 'Segoe UI', sans-serif;
       min-height: 100vh;
       position: relative;
+      color: #000;
     }
 
     body::before {
@@ -22,17 +25,16 @@
       background-image: url('https://media.licdn.com/dms/image/v2/C5605AQF-8cSaDlhrtQ/feedshare-thumbnail_720_1280/feedshare-thumbnail_720_1280/0/1659938691153?e=2147483647&v=beta&t=1oR4qJCLb-iSWTnF3sLHhETQQ9b0pPAPb3Op8cLfY0Q');
       background-size: cover;
       background-position: center;
-      filter: blur(10px);
       z-index: -1;
     }
 
     .container {
-      background-color: rgba(255, 255, 255, 0.92);
+      background-color: rgba(255, 255, 255, 0.95);
       max-width: 900px;
       margin: 60px auto;
       padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     }
 
     .logo-area {
@@ -84,8 +86,8 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 14px;
       margin-top: 20px;
+      font-size: 14px;
     }
 
     th, td {
@@ -105,10 +107,6 @@
 
     a:hover {
       text-decoration: underline;
-    }
-
-    #hasil {
-      margin-bottom: 20px;
     }
 
     #loading-status {
@@ -132,7 +130,7 @@
 
     .export-area {
       text-align: center;
-      margin-top: 10px;
+      margin-top: 20px;
       display: none;
     }
 
@@ -144,25 +142,21 @@
       padding: 10px 20px;
       border-radius: 8px;
       cursor: pointer;
-      margin-top: 8px;
     }
 
     .copyright {
       position: fixed;
-      bottom: 0;
-      left: 0;
+      bottom: 10px;
       width: 100%;
       text-align: center;
-      padding: 10px 0;
-      font-size: 13px;
       color: white;
+      font-size: 13px;
       background: none;
-      z-index: 999;
     }
 
     @media (max-width: 600px) {
       .logo-area img {
-        max-height: 40px;
+        max-height: 32px;
       }
     }
   </style>
@@ -184,16 +178,13 @@
 
     <div id="hasil"></div>
     <div id="loading-status" class="loading">⏳ Memuat data</div>
-    
+
     <div class="export-area" id="export-area">
-      <div>✅ Siap digunakan</div>
       <button onclick="exportToExcel()">📥 Export ke Excel</button>
     </div>
   </div>
 
-  <div class="copyright">
-    © Abdany Afiq Khoiri
-  </div>
+  <div class="copyright">© Abdany Afiq Khoiri</div>
 
   <script>
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
@@ -253,10 +244,10 @@
 
         hasilEl.innerHTML = html;
         exportArea.style.display = "block";
-        exportArea.querySelector('div').style.display = "none"; // ⛳ Hapus teks "Siap digunakan"
-      }
 
-      loadingStatus.style.display = "none";
+        // Sembunyikan status setelah pencarian
+        loadingStatus.style.display = "none";
+      }
     }
 
     function exportToExcel() {
@@ -264,9 +255,9 @@
       if (!table) return;
 
       const html = table.outerHTML;
-      const url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+      const uri = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = uri;
       a.download = 'hasil_pencarian.xls';
       a.click();
     }
