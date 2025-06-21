@@ -41,12 +41,13 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      gap: 16px;
       margin-bottom: 20px;
     }
 
     .logo-area img {
       max-height: 60px;
-      margin: 0 10px;
+      height: auto;
     }
 
     h2 {
@@ -146,9 +147,10 @@
 
   <div class="container">
 
-    <!-- 🖼️ Logo INKA -->
+    <!-- 🖼️ Logo Area -->
     <div class="logo-area">
       <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ69QXtwjPAX9n-HEuVsGFbED52tO3OiGtivQ&s" alt="Logo Mitra">
     </div>
 
     <h2>🔍 Cari File PDF - Revisi Terakhir</h2>
@@ -176,6 +178,7 @@
       }
     }
 
+    // Saat pertama kali buka halaman
     setLoadingStatus("Memuat data", true);
 
     fetch(url)
@@ -203,7 +206,7 @@
 
       if (hasil.length === 0) {
         document.getElementById("hasil").innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
-        setLoadingStatus("✅ Siap digunakan", false); // tetap gunakan "siap digunakan"
+        setLoadingStatus("✅ Siap digunakan", false);
         return;
       }
 
