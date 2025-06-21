@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Pencarian File PDF Revisi Terakhir</title>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
+    input { padding: 8px; width: 70%; margin-right: 10px; }
+    button { padding: 8px 12px; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    a { color: blue; text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <h2>🔍 Cari File PDF - Revisi Terakhir</h2>
+  <input type="text" id="keyword" placeholder="Masukkan nama atau kode file" />
+  <button onclick="cari()">Cari</button>
+
+  <div id="hasil"></div>
+
+  <script>
+    const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec"; // Ganti dengan URL Web App kamu
+    let semuaData = [];
+
+    // Ambil data dari Web App saat awal
+    fetch(url)
+      .then(res => res.json())
+      .then(json => {
+        semuaData = json;
+        console.log("✅ Data berhasil dimuat:", semuaData.length, "file");
+      })
+      .catch(err => {
+        document.getElementById("hasil").innerHTML = "⚠️ Gagal mengambil data.";
+        console.error(err);
+      });
+
+    function cari() {
+      const keyword = document.getElementById("keyword").value.trim().toLowerCase();
+      if (!keyword) return;
+
+      const hasil = semuaData.filter(item =>
+        item.name.toLowerCase().includes(keyword)
+      );
+
+      if (hasil.length === 0) {
+        document.getElementById("hasil").innerHTML = "<p>❌ Tidak ada file ditemukan.</p>";
+        return;
+      }
+
+      // Ambil hanya revisi tertinggi per file group
+      const groupMap = {};
+      hasil.forEach(file => {
+        const key = file.kode + "-" + file.kode_lanjutan + "-" + file.halaman;
+        const rev = parseInt(file.revisi) || 0;
+        if (!groupMap[key] || rev > groupMap[key].revisi) {
+          groupMap[key] = { ...file, revisi };
+        }
+      });
+
+      // Tampilkan
+      let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link</th></tr>";
+      Object.values(groupMap).forEach(file => {
+        html += `<tr>
+          <td>${file.name}</td>
+          <td>${file.revisi}</td>
+          <td><a href="${file.url}" target="_blank">🔗 Buka PDF</a></td>
+        </tr>`;
+      });
+      html += "</table>";
+
+      document.getElementById("hasil").innerHTML = html;
+    }
+  </script>
+
+</body>
+</html>
