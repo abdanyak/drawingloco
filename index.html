@@ -15,7 +15,9 @@
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-      background-attachment: fixed;
+      background-attachment: fixed;    /* Agar background fix diam */
+  filter: blur(2px);               /* Efek blur */
+  pointer-events: none;            /* Supaya tidak mengganggu klik */
     }
     header {
       display: flex; justify-content: space-between; align-items: center;
