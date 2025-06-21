@@ -3,30 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <title>Pencarian File PDF Revisi Terakhir</title>
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 800px; margin: auto; }
-    input { padding: 8px; width: 70%; margin-right: 10px; }
-    button { padding: 8px 12px; }
+    body { font-family: sans-serif; padding: 20px; max-width: 900px; margin: auto; }
+    input { padding: 8px; width: 70%; margin-right: 10px; font-size: 16px; }
+    button { padding: 8px 14px; font-size: 16px; cursor: pointer; }
     table { width: 100%; margin-top: 20px; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #f3f3f3; }
     a { color: blue; text-decoration: underline; }
   </style>
 </head>
 <body>
 
   <h2>🔍 Cari File PDF - Revisi Terakhir</h2>
-  <input type="text" id="keyword" placeholder="Masukkan nama atau kode file" />
+  <input type="text" id="keyword" placeholder="Contoh: 117622 atau COW_CATCHER" />
   <button onclick="cari()">Cari</button>
 
-  <div id="hasil"></div>
+  <div id="hasil" style="margin-top: 20px;"></div>
 
   <script>
-    const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec"; // Ganti dengan URL Web App kamu
+    const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
     let semuaData = [];
 
-    // Ambil data dari Web App saat awal
+    // Fetch data dari Google Apps Script
     fetch(url)
       .then(res => res.json())
       .then(json => {
@@ -34,16 +33,16 @@
         console.log("✅ Data berhasil dimuat:", semuaData.length, "file");
       })
       .catch(err => {
-        document.getElementById("hasil").innerHTML = "⚠️ Gagal mengambil data.";
+        document.getElementById("hasil").innerHTML = "⚠️ Gagal mengambil data dari server.";
         console.error(err);
       });
 
     function cari() {
-      const keyword = document.getElementById("keyword").value.trim().toLowerCase();
-      if (!keyword) return;
+      const kata = document.getElementById("keyword").value.trim().toLowerCase();
+      if (!kata) return;
 
       const hasil = semuaData.filter(item =>
-        item.name.toLowerCase().includes(keyword)
+        item.name.toLowerCase().includes(kata)
       );
 
       if (hasil.length === 0) {
@@ -51,24 +50,26 @@
         return;
       }
 
-      // Ambil hanya revisi tertinggi per file group
-      const groupMap = {};
+      // Ambil hanya revisi terakhir per kombinasi Kode + Kode Lanjutan + Halaman
+      const fileTerakhir = {};
       hasil.forEach(file => {
-        const key = file.kode + "-" + file.kode_lanjutan + "-" + file.halaman;
+        const key = `${file.kode}-${file.kode_lanjutan}-${file.halaman}`;
         const rev = parseInt(file.revisi) || 0;
-        if (!groupMap[key] || rev > groupMap[key].revisi) {
-          groupMap[key] = { ...file, revisi };
+        if (!fileTerakhir[key] || rev > fileTerakhir[key].revisi) {
+          fileTerakhir[key] = { ...file, revisi: rev };
         }
       });
 
-      // Tampilkan
-      let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link</th></tr>";
-      Object.values(groupMap).forEach(file => {
-        html += `<tr>
-          <td>${file.name}</td>
-          <td>${file.revisi}</td>
-          <td><a href="${file.url}" target="_blank">🔗 Buka PDF</a></td>
-        </tr>`;
+      // Tampilkan hasil
+      let html = "<table><tr><th>Nama File</th><th>REV</th><th>Link PDF</th></tr>";
+      Object.values(fileTerakhir).forEach(file => {
+        html += `
+          <tr>
+            <td>${file.name}</td>
+            <td>${file.revisi}</td>
+            <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
+          </tr>
+        `;
       });
       html += "</table>";
 
