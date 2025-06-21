@@ -176,6 +176,7 @@
       .then(json => {
         semuaData = json;
         loadingStatus.textContent = "✅ Siap digunakan";
+        loadingStatus.classList.remove("dot-animate");
       })
       .catch(err => {
         loadingStatus.textContent = "⚠️ Gagal mengambil data";
