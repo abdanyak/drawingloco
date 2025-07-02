@@ -19,7 +19,6 @@
       background-image: url('image.jpeg');
       background-size: cover;
       background-position: center;
-      /*filter: blur(2px);*/
       z-index: -1;
     }
     header {
@@ -27,7 +26,7 @@
       background-color: rgba(255,255,255,0.92);
       padding: 10px 20px;
     }
-    .logo-left img { height: 20px; }
+    .logo-left img { height: 20px; margin-right: 10px; }
     .logo-right img { height: 30px; }
     .container {
       background-color: rgba(255,255,255,0.92);
@@ -37,7 +36,7 @@
       border-radius: 12px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
     }
-    h2 { text-align: center; margin-bottom: 25px; }
+    h2 { text-align: center; margin-bottom: 20px; }
     .search-bar {
       display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
       margin-bottom: 20px;
@@ -105,6 +104,50 @@
       table, th, td { font-size: 12px; }
       .file-name { max-width: 90px; }
     }
+
+    /* Modal Petunjuk */
+  .popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+  }
+  .popup-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+  .popup-content {
+    background-color: white;
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    border-radius: 10px;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    animation: muncul 0.3s ease-out;
+  }
+  @keyframes muncul {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .close-btn {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #555;
+  }
+  .close-btn:hover {
+    color: red;
+  }
   </style>
 </head>
 <body>
@@ -117,8 +160,14 @@
       <img src="https://upload.wikimedia.org/wikipedia/commons/f/f4/Logo_INKA_-_Industri_Kereta_Api_Indonesia.svg" alt="Logo INKA">
     </div>
   </header>
+
   <div class="container">
     <h2>Drawing Loco Platform UGL</h2>
+    <div style="text-align:center; margin-bottom: 20px;">
+      <button onclick="bukaPetunjuk()" style="font-size:15px; padding:6px 12px; border-radius:6px; border:none; background:#17a2b8; color:white; cursor:pointer;">
+        📘 Petunjuk Penggunaan
+      </button>
+    </div>
     <div class="search-bar">
       <input type="text" id="keyword" placeholder="Masukkan nama atau kode file (contoh: 117622 atau ASSY)">
       <button onclick="cari()">Cari</button>
@@ -130,9 +179,34 @@
       <button onclick="exportToExcel()">📥 Export File Terpilih (.xlsx)</button>
     </div>
   </div>
+
+<!-- Modal Pop-up dengan Pencarian -->
+<div id="popup-petunjuk" class="popup-overlay">
+  <div class="popup-wrapper">
+    <div class="popup-content">
+      <span class="close-btn" onclick="tutupPetunjuk()">✖</span>
+      <h3>📘 Petunjuk Penggunaan</h3>
+
+      <!-- Input Search -->
+      <input type="text" id="search-petunjuk" placeholder="Cari kode atau keterangan..." oninput="filterPetunjuk()" style="width: 100%; padding: 8px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px;">
+
+      <!-- Daftar Kode Petunjuk -->
+      <ul id="daftar-petunjuk" style="max-height: 300px; overflow-y: auto; padding-left: 20px;">
+        <li><strong>117622</strong> – Kode untuk Frame Assy Bawah</li>
+        <li><strong>220345</strong> – Kode untuk Wiring Harness</li>
+        <li><strong>ASSY-03</strong> – Assembling Platform Bagian Tengah</li>
+        <li><strong>WELD-001</strong> – Instruksi Pengelasan</li>
+        <li><strong>PAINT-77</strong> – Prosedur Pengecatan Primer</li>
+        <li><strong>BOLT-A12</strong> – Spesifikasi Baut Stainless</li>
+        <!-- Tambahkan baris lainnya sesuai kebutuhan -->
+      </ul>
+    </div>
+  </div>
+</div>
+
   <div class="copyright">© Abdany Afiq Khoiri</div>
+
   <script>
-    // --- Variabel Global ---
     const url = "https://script.google.com/macros/s/AKfycbwozo-MZ4SymDailXuv5NdbbCGd7KfYCquHNYklNlEy3jjvEG1RmXcKkziRDc7l1Aac/exec";
     let semuaData = [];
     const selectedFiles = new Map();
@@ -141,13 +215,8 @@
     const loadingStatus = document.getElementById("loading-status");
     const exportArea = document.getElementById("export-area");
 
-    // State urutan (sort)
-    let sortState = {
-      column: null, // 'name' atau 'revisi'
-      asc: true
-    };
+    let sortState = { column: null, asc: true };
 
-    // --- Ambil Data ---
     fetch(url)
       .then(res => res.json())
       .then(json => {
@@ -160,43 +229,28 @@
         console.error(err);
       });
 
-    // --- Update Daftar File Terpilih ---
     function updateSelectedList() {
       if (selectedFiles.size === 0) {
         fileTerpilihEl.innerHTML = "";
         return;
       }
-      let html = `<div class='table-wrapper'><h3>📌 File Terpilih</h3>
-      <table>
-        <thead>
-          <tr>
-            <th class="file-name">Nama File</th>
-            <th>REV</th>
-            <th>Link</th>
-            <th>Hapus</th>
-          </tr>
-        </thead>
-        <tbody>`;
+      let html = `<div class='table-wrapper'><h3>📌 File Terpilih</h3><table><thead><tr>
+        <th class="file-name">Nama File</th><th>REV</th><th>Link</th><th>Hapus</th></tr></thead><tbody>`;
       selectedFiles.forEach((file, key) => {
-        html += `<tr>
-          <td class="file-name">${file.name}</td>
-          <td>${file.revisi}</td>
+        html += `<tr><td class="file-name">${file.name}</td><td>${file.revisi}</td>
           <td><a href="${file.url}" target="_blank">📄 Lihat</a></td>
-          <td><button onclick="hapusDipilih('${key}')">❌</button></td>
-        </tr>`;
+          <td><button onclick="hapusDipilih('${key}')">❌</button></td></tr>`;
       });
       html += `</tbody></table></div>`;
       fileTerpilihEl.innerHTML = html;
     }
 
-    // --- Hapus dari File Terpilih ---
     function hapusDipilih(key) {
       selectedFiles.delete(key);
       updateSelectedList();
-      cari(); // refresh checkbox
+      cari();
     }
 
-    // --- Pilih/Unpilih File ---
     function toggleSelection(checkbox) {
       const key = checkbox.getAttribute("data-key");
       const [name, revisi, url] = key.split("|");
@@ -208,7 +262,6 @@
       updateSelectedList();
     }
 
-    // --- Pilih Semua ---
     function toggleAll(source) {
       const checkboxes = document.querySelectorAll("input[type='checkbox'].item-check");
       checkboxes.forEach(cb => {
@@ -217,7 +270,6 @@
       });
     }
 
-    // --- Fungsi Sorting ---
     function sortTable(column) {
       if (sortState.column === column) {
         sortState.asc = !sortState.asc;
@@ -225,10 +277,9 @@
         sortState.column = column;
         sortState.asc = true;
       }
-      cari(); // Refresh tabel dengan urutan baru
+      cari();
     }
 
-    // --- Fungsi Pencarian & Tampilkan Tabel ---
     function cari() {
       const keyword = document.getElementById("keyword").value.trim().toLowerCase();
       if (!keyword) return;
@@ -247,13 +298,10 @@
 
       let dataRows = Object.values(fileTerakhir);
 
-      // Sorting jika sortState ada
       if (sortState.column) {
         dataRows.sort((a, b) => {
           let aVal = a[sortState.column];
           let bVal = b[sortState.column];
-
-          // Untuk REV, jika angka bandingkan sebagai angka
           if (sortState.column === "revisi") {
             let aNum = parseInt(aVal, 10);
             let bNum = parseInt(bVal, 10);
@@ -261,27 +309,17 @@
               aVal = aNum; bVal = bNum;
             }
           }
-
           if (aVal < bVal) return sortState.asc ? -1 : 1;
           if (aVal > bVal) return sortState.asc ? 1 : -1;
           return 0;
         });
       }
 
-      let html = `<div class='table-wrapper'><table>
-        <thead>
-          <tr>
-            <th><input type='checkbox' onclick='toggleAll(this)'> All</th>
-            <th class="file-name sortable" onclick="sortTable('name')">
-              Nama File <span id="sort-name"></span>
-            </th>
-            <th class="sortable" onclick="sortTable('revisi')">
-              REV <span id="sort-revisi"></span>
-            </th>
-            <th>Link PDF</th>
-          </tr>
-        </thead>
-        <tbody>`;
+      let html = `<div class='table-wrapper'><table><thead><tr>
+        <th><input type='checkbox' onclick='toggleAll(this)'> All</th>
+        <th class="file-name sortable" onclick="sortTable('name')">Nama File <span id="sort-name"></span></th>
+        <th class="sortable" onclick="sortTable('revisi')">REV <span id="sort-revisi"></span></th>
+        <th>Link PDF</th></tr></thead><tbody>`;
 
       dataRows.forEach(file => {
         const fileKey = `${file.name}|${file.revisi}|${file.url}`;
@@ -290,8 +328,7 @@
           <td><input type='checkbox' class='item-check' data-key="${fileKey}" onchange="toggleSelection(this)" ${isChecked}></td>
           <td class="file-name">${file.name}</td>
           <td>${file.revisi}</td>
-          <td><a href="${file.url}" target="_blank">📄 Buka File</a></td>
-        </tr>`;
+          <td><a href="${file.url}" target="_blank">📄 Buka File</a></td></tr>`;
       });
 
       html += "</tbody></table></div>";
@@ -299,15 +336,12 @@
       exportArea.style.display = "block";
       loadingStatus.style.display = "none";
       updateSelectedList();
-
-      // Update icon sort
       document.getElementById("sort-name").textContent =
         sortState.column === "name" ? (sortState.asc ? "▲" : "▼") : "";
       document.getElementById("sort-revisi").textContent =
         sortState.column === "revisi" ? (sortState.asc ? "▲" : "▼") : "";
     }
 
-    // --- Export ke Excel ---
     function exportToExcel() {
       if (selectedFiles.size === 0) {
         alert("❗ Pilih minimal satu file terlebih dahulu.");
@@ -322,6 +356,32 @@
       XLSX.utils.book_append_sheet(wb, ws, "File Terpilih");
       XLSX.writeFile(wb, "file_terpilih.xlsx");
     }
+
+    function bukaPetunjuk() {
+      document.getElementById("popup-petunjuk").style.display = "block";
+    }
+
+    function tutupPetunjuk() {
+      document.getElementById("popup-petunjuk").style.display = "none";
+    }
+    
+      function bukaPetunjuk() {
+    document.getElementById("popup-petunjuk").style.display = "flex";
+  }
+
+  function tutupPetunjuk() {
+    document.getElementById("popup-petunjuk").style.display = "none";
+  }
+
+  function filterPetunjuk() {
+    const input = document.getElementById("search-petunjuk").value.toLowerCase();
+    const listItems = document.querySelectorAll("#daftar-petunjuk li");
+
+    listItems.forEach(item => {
+      const text = item.textContent.toLowerCase();
+      item.style.display = text.includes(input) ? "" : "none";
+    });
+  }
   </script>
 </body>
 </html>
